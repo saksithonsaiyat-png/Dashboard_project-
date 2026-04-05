@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
-  <title>Executive Task Dashboard - Real-time Edition</title>
+  <title>Executive Task Dashboard - Real-time</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -63,23 +63,25 @@
   </div>
   
   <div class="flex flex-wrap items-center gap-3">
-    <div class="glass-card px-4 py-2.5 flex items-center gap-3 border-purple-500/30 bg-purple-900/20">
-      <label class="text-xs text-purple-300 font-bold uppercase tracking-widest"><i class="fa-solid fa-clock-rotate-left mr-1"></i> ดูงานวันที่:</label>
+    <div class="glass-card px-4 py-2.5 flex items-center gap-2 border-purple-500/30 bg-purple-900/20">
+      <label class="text-xs text-purple-300 font-bold uppercase tracking-widest">ดูงานวันที่:</label>
       <input id="dateFilter" type="date" class="bg-transparent border-none text-white text-sm focus:ring-0 cursor-pointer font-bold outline-none" />
+      <button onclick="clearDateFilter()" class="ml-2 text-rose-400 hover:text-rose-300 text-xs font-bold px-2 py-1 bg-white/5 rounded" title="ล้างวันที่เพื่อดูงานทั้งหมด">
+        <i class="fa-solid fa-xmark"></i> ดูทั้งหมด
+      </button>
     </div>
     
-    <label class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-900/40 transition-all active:scale-95 border border-indigo-400/30">
-      <i class="fa-solid fa-cloud-arrow-up"></i> นำเข้าไฟล์ (Excel/CSV)
+    <label class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-900/40 transition-all active:scale-95 border border-indigo-400/30">
+      <i class="fa-solid fa-cloud-arrow-up"></i> นำเข้าไฟล์
       <input id="fileUpload" type="file" accept=".xlsx,.xls,.csv" class="hidden" multiple />
     </label>
 
-    <!-- ปุ่มใหม่: บังคับซิงค์ข้อมูลขึ้นคลาวด์ด้วยตัวเอง -->
     <button onclick="forceSync()" class="bg-sky-500/20 text-sky-400 hover:bg-sky-500 hover:text-white border border-sky-500/50 px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
-      <i class="fa-solid fa-arrows-rotate"></i> บังคับซิงค์ (Force Sync)
+      <i class="fa-solid fa-arrows-rotate"></i> บังคับซิงค์
     </button>
 
     <button onclick="hardReset()" class="bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30 hover:border-rose-500 px-4 py-2.5 rounded-xl text-xs font-bold transition-all">
-      <i class="fa-solid fa-trash-can"></i> ล้างข้อมูล
+      <i class="fa-solid fa-trash-can"></i> ล้างขยะ
     </button>
   </div>
 </header>
@@ -103,17 +105,17 @@
   <div class="glass-card p-5 border-t-2 border-emerald-500 relative overflow-hidden">
     <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Success (S)</p>
     <h3 id="successStat" class="text-4xl font-black text-emerald-400 relative z-10">0</h3>
-    <p class="text-[10px] text-slate-500 mt-1">งานที่สำเร็จในวันที่เลือก</p>
+    <p class="text-[10px] text-slate-500 mt-1">งานที่สำเร็จ</p>
   </div>
   <div class="glass-card p-5 border-t-2 border-amber-500 relative overflow-hidden">
     <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Pending (P)</p>
     <h3 id="pendingStat" class="text-4xl font-black text-amber-400 relative z-10">0</h3>
-    <p class="text-[10px] text-slate-500 mt-1">งานที่กำลังทำในวันที่เลือก</p>
+    <p class="text-[10px] text-slate-500 mt-1">งานที่กำลังทำ</p>
   </div>
   <div class="glass-card p-5 border-t-2 border-slate-500 relative overflow-hidden">
     <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Not Run (N)</p>
     <h3 id="notrunStat" class="text-4xl font-black text-slate-400 relative z-10">0</h3>
-    <p class="text-[10px] text-slate-500 mt-1">งานที่ยังไม่เริ่มในวันที่เลือก</p>
+    <p class="text-[10px] text-slate-500 mt-1">งานที่ยังไม่เริ่ม</p>
   </div>
   <div class="glass-card p-5 border-t-2 border-indigo-500 relative overflow-hidden">
     <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Routine Progress</p>
@@ -126,7 +128,7 @@
 <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
     <div class="glass-card p-5 h-72 flex flex-col lg:col-span-1">
         <h3 class="text-sm font-bold text-slate-200 mb-2 flex justify-between">
-            <span><i class="fa-solid fa-chart-pie text-indigo-400 mr-2"></i>ภาพรวมบริษัท (วันนี้)</span>
+            <span><i class="fa-solid fa-chart-pie text-indigo-400 mr-2"></i>ภาพรวมสถานะ</span>
         </h3>
         <div class="flex-1 relative w-full h-full flex items-center justify-center">
             <canvas id="companyChart"></canvas>
@@ -134,7 +136,7 @@
     </div>
     <div class="glass-card p-5 h-72 flex flex-col lg:col-span-2">
         <h3 class="text-sm font-bold text-slate-200 mb-2 flex justify-between">
-            <span><i class="fa-solid fa-users text-emerald-400 mr-2"></i>ความคืบหน้ารายบุคคล (Employee Progress)</span>
+            <span><i class="fa-solid fa-users text-emerald-400 mr-2"></i>ความคืบหน้ารายบุคคล</span>
         </h3>
         <div class="flex-1 relative w-full h-full">
             <canvas id="employeeChart"></canvas>
@@ -143,7 +145,7 @@
 </section>
 
 <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-  <!-- Routine Tasks (Group A, B) -->
+  <!-- Routine Tasks -->
   <div class="xl:col-span-5 glass-card overflow-hidden flex flex-col h-[750px]">
     <div class="p-4 bg-black/20 border-b border-white/5 flex justify-between items-center">
         <h2 class="font-bold text-emerald-400 flex items-center gap-2">
@@ -159,12 +161,12 @@
     <div id="routineContainer" class="p-4 space-y-4 overflow-y-auto flex-1"></div>
   </div>
 
-  <!-- Right Column (Adhoc & Compliant) -->
+  <!-- Right Column -->
   <div class="xl:col-span-7 flex flex-col gap-6 h-[750px]">
       <div class="glass-card overflow-hidden flex flex-col flex-1 border-sky-500/30">
         <div class="p-4 bg-black/20 border-b border-sky-500/20 flex justify-between items-center">
             <h2 class="font-bold text-sky-400 flex items-center gap-2">
-                <i class="fa-solid fa-list-check"></i> งานเฉพาะกิจ (Adhoc Monitoring)
+                <i class="fa-solid fa-list-check"></i> งานเฉพาะกิจ (Adhoc)
             </h2>
         </div>
         <div class="overflow-y-auto flex-1 p-2">
@@ -172,7 +174,7 @@
                 <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/5 bg-black/10 sticky top-0 backdrop-blur-md z-10">
                     <tr>
                         <th class="px-4 py-2">ชื่องาน (Job Name)</th>
-                        <th class="px-4 py-2">ผู้รับผิดชอบ</th>
+                        <th class="px-4 py-2">พนักงาน</th>
                         <th class="px-4 py-2">กลุ่มงาน</th>
                         <th class="px-4 py-2">Deadline</th>
                         <th class="px-4 py-2 text-center">สถานะ</th>
@@ -193,8 +195,8 @@
             <table class="w-full text-sm text-left">
                 <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/5 bg-black/10 sticky top-0 backdrop-blur-md z-10">
                     <tr>
-                        <th class="px-4 py-2">เคสร้องเรียน (Job Name)</th>
-                        <th class="px-4 py-2">ผู้รับผิดชอบ</th>
+                        <th class="px-4 py-2">เคสร้องเรียน</th>
+                        <th class="px-4 py-2">พนักงาน</th>
                         <th class="px-4 py-2">กลุ่มงาน</th>
                         <th class="px-4 py-2">Deadline</th>
                         <th class="px-4 py-2 text-center">สถานะ</th>
@@ -207,11 +209,11 @@
   </div>
 </div>
 
-<!-- สคริปต์รวบยอดทั้งหมด -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+// โค้ด Firebase ของคุณ (ถูกต้องแล้ว)
 const firebaseConfig = {
   apiKey: "AIzaSyBCe24a2jf09xA0B9P9Z7tEL6m2WhhNP3g",
   authDomain: "dashboard-project-1e251.firebaseapp.com",
@@ -246,6 +248,7 @@ function init() {
     const savedName = localStorage.getItem('ExecDash_CompanyName_Client');
     if(savedName) el('companyNameText').innerText = savedName;
 
+    // ระบบดึงข้อมูลจาก Cloud แบบมีตัวเลขนับจำนวน
     onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
         if (docSnap.exists()) {
             const remoteData = docSnap.data();
@@ -256,7 +259,8 @@ function init() {
             renderUI();
             
             if (!isInitialLoad) {
-                showAlert('ข้อมูลซิงค์ตรงกับคลาวด์แล้ว 🟢', 'emerald', 'fa-cloud-arrow-down');
+                // อัปเกรด: บอกจำนวนงานให้รู้เลยว่าดึงมาสำเร็จ
+                showAlert(`ซิงค์สำเร็จ! โหลดงานจาก Cloud มาแล้ว ${appState.tasks.length} รายการ`, 'emerald', 'fa-cloud-arrow-down');
             }
             isInitialLoad = false;
         } else {
@@ -269,43 +273,41 @@ function init() {
     });
 }
 
-// 🔴 อัปเกรดฟังก์ชันบันทึกข้อมูล (แก้บัค Undefined) 🔴
 function saveTasksToCloud(showProgress = true) {
     if (showProgress) showAlert('กำลังบันทึกข้อมูลขึ้นระบบ Cloud...', 'amber', 'fa-spinner fa-spin');
-
-    // 1. บันทึกลงเครื่อง (สำรองไว้)
     localStorage.setItem(DB_KEY, JSON.stringify({ tasks: appState.tasks, staffMap: appState.staffMap }));
 
-    // 2. ล้างข้อมูล (Clean Data) ลบค่าที่ว่างเปล่าทิ้งไป ป้องกัน Firebase Error
-    const rawData = {
-        tasks: appState.tasks,
-        staffMap: appState.staffMap,
-        lastUpdated: new Date().getTime()
-    };
-    const cleanDataToSync = JSON.parse(JSON.stringify(rawData)); // Trick ล้างค่า undefined ให้สะอาดเอี่ยม
+    const rawData = { tasks: appState.tasks, staffMap: appState.staffMap, lastUpdated: new Date().getTime() };
+    const cleanDataToSync = JSON.parse(JSON.stringify(rawData)); 
 
-    // 3. ส่งขึ้นคลาวด์
     setDoc(doc(db, "dashboard", "mainData"), cleanDataToSync)
         .then(() => {
-            if (showProgress) showAlert('บันทึกข้อมูลขึ้น Cloud สำเร็จ! ทุกหน้าจออัปเดตตรงกันแล้ว', 'emerald', 'fa-cloud-arrow-up');
+            if (showProgress) showAlert(`บันทึกสำเร็จ! ข้อมูล ${appState.tasks.length} รายการ ออนไลน์แล้ว`, 'sky', 'fa-cloud-arrow-up');
         })
         .catch(err => {
             console.error("Firebase Save Error:", err);
-            showAlert('เกิดข้อผิดพลาดในการบันทึกขึ้น Cloud: ' + err.message, 'rose', 'fa-triangle-exclamation');
+            showAlert('บันทึกผิดพลาด: ' + err.message, 'rose', 'fa-triangle-exclamation');
         });
 }
 
-// ฟังก์ชันสำหรับปุ่ม Force Sync
+// 🔴 เพิ่มฟังก์ชันสำหรับปุ่ม "ดูงานทั้งหมด" 🔴
+window.clearDateFilter = function() {
+    el('dateFilter').value = ''; // ล้างช่องวันที่
+    appState.selectedDate = '';  // เซ็ตให้เป็นค่าว่าง
+    renderUI();
+    showAlert('กำลังแสดงงานของ "ทุกวัน" ที่มีอยู่ในระบบ', 'indigo', 'fa-calendar-check');
+};
+
 window.forceSync = function() {
     if(appState.tasks.length === 0) {
-        showAlert('ไม่มีข้อมูลให้ซิงค์ กรุณานำเข้าไฟล์ก่อน', 'amber', 'fa-circle-info');
+        showAlert('ไม่มีข้อมูลให้ซิงค์', 'amber', 'fa-circle-info');
         return;
     }
     saveTasksToCloud(true);
 };
 
 window.hardReset = function() { 
-    if(confirm('คำเตือน: นี่คือการล้างข้อมูลของ "ทุกคน" บนระบบคลาวด์ ยืนยันหรือไม่?')) { 
+    if(confirm('คำเตือน: นี่คือการล้างข้อมูลขยะทั้งหมดบนระบบคลาวด์ ยืนยันหรือไม่?')) { 
         setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {}, lastUpdated: new Date().getTime() });
         location.reload(); 
     } 
@@ -422,7 +424,8 @@ function processFileContent(workbook, fileName) {
                 
                 if (!taskKey) return;
                 const taskName = String(row[taskKey]).trim();
-                if (!taskName) return;
+                // 🔴 อัปเกรด: กรองขยะทิ้ง ถ้าง่ายไม่มีชื่อ ไม่เอาเข้าคลาวด์
+                if (!taskName || taskName === 'ไม่ระบุ') return;
 
                 const rawOwner = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
                 const ownerFormatted = staffDictionary[rawOwner] || rawOwner;
@@ -455,7 +458,7 @@ function processFileContent(workbook, fileName) {
 
                 if (!taskKey) return;
                 const taskName = String(row[taskKey]).trim();
-                if (!taskName) return;
+                if (!taskName || taskName === 'ไม่ระบุ') return;
 
                 const rawOwner = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
                 const ownerFormatted = staffDictionary[rawOwner] || rawOwner;
@@ -494,7 +497,7 @@ el('fileUpload').addEventListener('change', async (e) => {
     }
     
     if (newlyParsedTasks.length === 0) {
-        showAlert('นำเข้าไม่สำเร็จ: ไม่พบข้อมูลงาน', 'rose', 'fa-triangle-exclamation');
+        showAlert('นำเข้าไม่สำเร็จ: ไม่พบข้อมูล', 'rose', 'fa-triangle-exclamation');
         return;
     }
     
@@ -512,13 +515,14 @@ el('fileUpload').addEventListener('change', async (e) => {
 
     updateDropdowns();
     renderUI();
-    
-    // อัปโหลดไฟล์เสร็จ สั่งบันทึกขึ้น Cloud ทันที
     saveTasksToCloud(true); 
     e.target.value = ''; 
 });
 
-el('dateFilter').addEventListener('change', (e) => { if (e.target.value) { appState.selectedDate = e.target.value; renderUI(); } });
+el('dateFilter').addEventListener('change', (e) => { 
+    appState.selectedDate = e.target.value; // ยอมให้เป็นค่าว่างได้
+    renderUI(); 
+});
 el('employeeSelect').addEventListener('change', (e) => { appState.filters.employee = e.target.value; renderUI(); });
 el('jobTypeSelect').addEventListener('change', (e) => { appState.filters.jobType = e.target.value; renderUI(); });
 
@@ -578,7 +582,10 @@ function renderUI() {
     const { employee, jobType } = appState.filters;
     const targetDate = appState.selectedDate; 
 
+    // 🔴 อัปเกรด: ถ้าไม่มีวันที่ (กดปุ่มดูทั้งหมด) ให้แสดงงานทั้งหมดทันที 🔴
     let dateFilteredTasks = appState.tasks.filter(t => {
+        if (!targetDate) return true; 
+        
         if(t.category === 'Routine') return t.date === targetDate;
         if(t.category === 'Adhoc' || t.category === 'Compliant') {
             if(!t.date && !t.receiveDate) return true;
@@ -610,13 +617,14 @@ function renderUI() {
     const doneRoutine = finalFiltered.filter(t => t.category === 'Routine' && t.status === 'done').length;
     el('percentStat').innerText = totalRoutine ? `${Math.round((doneRoutine/totalRoutine)*100)}%` : '0%';
 
-    el('routineDateLabel').innerText = `วันที่: ${targetDate}`;
+    // เปลี่ยน Label ให้รู้ว่าดูของวันไหนอยู่
+    el('routineDateLabel').innerText = targetDate ? `วันที่: ${targetDate}` : 'แสดงงานทุกวันที่มีในระบบ';
 
     const routineTasks = finalFiltered.filter(t => t.category === 'Routine');
     const rCont = el('routineContainer');
     
     if(routineTasks.length === 0) {
-        rCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-500 opacity-60 py-20"><i class="fa-regular fa-folder-open text-4xl mb-3"></i><p class="text-sm font-bold uppercase">ไม่มีงาน Routine สำหรับวันนี้</p></div>`;
+        rCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-500 opacity-60 py-20"><i class="fa-regular fa-folder-open text-4xl mb-3"></i><p class="text-sm font-bold uppercase">ไม่มีงาน Routine (ลองกดปุ่ม 'ดูทั้งหมด')</p></div>`;
     } else {
         const groupedRoutine = {};
         routineTasks.forEach(t => { if(!groupedRoutine[t.jobType]) groupedRoutine[t.jobType] = []; groupedRoutine[t.jobType].push(t); });
@@ -648,7 +656,7 @@ function renderUI() {
                         ${tasksInJob.map(t => `
                             <div class="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group">
                                 <div class="w-1/2 pr-2">
-                                    <p class="text-xs font-semibold ${t.status === 'done' ? 'line-through text-slate-500' : 'text-slate-200'} truncate" title="${t.taskName}">${t.taskName}</p>
+                                    <p class="text-xs font-semibold ${t.status === 'done' ? 'line-through text-slate-500' : 'text-slate-200'} truncate" title="${t.taskName}">${t.taskName} ${!targetDate && t.date ? `<span class="text-[9px] text-indigo-400 ml-1">(${t.date})</span>` : ''}</p>
                                 </div>
                                 <div class="w-1/4 px-2">
                                     <span class="text-[10px] text-slate-400 bg-black/40 px-2 py-1 rounded truncate block text-center border border-white/5" title="${t.ownerName}">${t.ownerName}</span>
@@ -689,8 +697,8 @@ function renderUI() {
         </tr>
     `}).join('') : `<tr><td colspan="5" class="py-10 text-center text-slate-500 opacity-60"><p class="text-xs font-bold uppercase">${emptyMsg}</p></td></tr>`;
 
-    el('adhocTableBody').innerHTML = renderTableRows(finalFiltered.filter(t => t.category === 'Adhoc'), 'ไม่มีงาน Adhoc/Project');
-    el('compliantTableBody').innerHTML = renderTableRows(finalFiltered.filter(t => t.category === 'Compliant'), 'ไม่มีเคสร้องเรียน');
+    el('adhocTableBody').innerHTML = renderTableRows(finalFiltered.filter(t => t.category === 'Adhoc'), 'ไม่มีงาน Adhoc (ลองกดปุ่มดูทั้งหมด)');
+    el('compliantTableBody').innerHTML = renderTableRows(finalFiltered.filter(t => t.category === 'Compliant'), 'ไม่มีเคสร้องเรียน (ลองกดปุ่มดูทั้งหมด)');
 }
 
 init();
