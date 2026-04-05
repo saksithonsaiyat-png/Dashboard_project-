@@ -4,27 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
   
-  <title>Executive Task Dashboard - Real-time</title>
+  <title>Executive Task Dashboard - Final Version</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;600;700&display=swap');
     body {
-      background-color: #211c38;
-      background-image: linear-gradient(180deg, #211c38 0%, #151226 100%);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f172a;
+      background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 400px),
+                        radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.1), transparent 400px);
+      font-family: 'Anuphan', sans-serif;
       color: #e2e8f0;
     }
     .glass-card {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(30, 41, 59, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(16px);
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(20px);
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
     }
     .status-select {
         appearance: none;
@@ -34,153 +35,159 @@
         background-size: 1em 1em;
     }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-    ::-webkit-scrollbar-thumb { background: #5b4a99; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #7c66c7; }
+    ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
   </style>
 </head>
-<body class="min-h-screen p-4 md:p-6 pb-20">
+<body class="min-h-screen p-4 md:p-8 pb-24">
 
-<!-- Header & Controls -->
-<header class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-8 border-b border-white/10 pb-6">
-  <div class="flex items-center gap-4">
-    <label class="w-16 h-16 rounded-2xl bg-white/5 shadow-lg shadow-purple-500/20 flex items-center justify-center overflow-hidden border border-purple-500/30 shrink-0 cursor-pointer hover:border-purple-400 transition-all group relative">
-        <img id="companyLogoImg" src="https://placehold.co/150x150/4a3f8a/ffffff?text=LOGO" alt="Company Logo" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <i class="fa-solid fa-camera text-white"></i>
+<!-- Header -->
+<header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10 border-b border-white/5 pb-8">
+  <div class="flex items-center gap-6">
+    <label class="w-20 h-20 rounded-3xl bg-indigo-500/10 shadow-2xl flex items-center justify-center overflow-hidden border border-indigo-500/30 shrink-0 cursor-pointer hover:scale-105 transition-all group relative">
+        <img id="companyLogoImg" src="https://placehold.co/200x200/1e293b/4f46e5?text=LOGO" alt="Logo" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-indigo-600/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <i class="fa-solid fa-camera text-white text-xl"></i>
         </div>
         <input type="file" id="logoUpload" accept="image/*" class="hidden">
     </label>
     <div>
-        <h2 id="companyNameText" class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-1 outline-none border-b border-transparent hover:border-purple-400 focus:border-purple-300 transition-colors cursor-text" contenteditable="true" title="คลิกเพื่อแก้ไข หรืออัปโหลดไฟล์ Master Data">
-            YOUR COMPANY NAME
+        <h2 id="companyNameText" class="text-xs font-black text-indigo-400 uppercase tracking-[0.3em] mb-2 outline-none border-b border-transparent hover:border-indigo-500 transition-all cursor-text" contenteditable="true">
+            YOUR ORGANIZATION
         </h2>
-        <h1 class="text-2xl md:text-3xl font-black text-white tracking-wide flex items-center gap-3">
-            Executive Monitor 
-            <span id="connectionBadge" class="text-[10px] bg-amber-600 px-2 py-1 rounded-full uppercase tracking-widest text-white align-middle animate-pulse">
-                <i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting...
+        <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight flex items-center gap-4">
+            Executive Cloud Dashboard
+            <span id="connectionBadge" class="text-[10px] bg-slate-800 px-3 py-1.5 rounded-full uppercase font-bold text-slate-400 align-middle">
+                <i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing
             </span>
         </h1>
-        <p class="text-purple-300/80 text-xs mt-1">อัปเดตข้อมูลอัตโนมัติซิงค์ตรงกับคลาวด์ตลอดเวลา</p>
+        <p class="text-slate-400 text-sm mt-1">ระบบติดตามงานแบบเรียลไทม์ เชื่อมโยงข้อมูลผ่านระบบคลาวด์</p>
     </div>
   </div>
   
   <div class="flex flex-wrap items-center gap-3">
-    <div class="glass-card px-4 py-2.5 flex items-center gap-2 border-purple-500/30 bg-purple-900/20">
-      <label class="text-xs text-purple-300 font-bold uppercase tracking-widest">ดูงานวันที่:</label>
+    <div class="glass-card px-5 py-3 flex items-center gap-3 border-indigo-500/20 bg-indigo-500/5">
+      <label class="text-[10px] text-indigo-300 font-black uppercase tracking-widest">Select Date</label>
       <input id="dateFilter" type="date" class="bg-transparent border-none text-white text-sm focus:ring-0 cursor-pointer font-bold outline-none" />
-      <button onclick="clearDateFilter()" class="ml-2 text-rose-400 hover:text-rose-300 text-xs font-bold px-2 py-1 bg-white/5 rounded" title="ล้างวันที่เพื่อดูงานทั้งหมด">
-        <i class="fa-solid fa-xmark"></i> ดูทั้งหมด
+      <button onclick="clearDateFilter()" class="ml-2 text-indigo-400 hover:text-white text-[10px] font-black uppercase bg-white/5 px-2 py-1 rounded transition-colors">
+        View All
       </button>
     </div>
     
-    <label class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-900/40 transition-all active:scale-95 border border-indigo-400/30">
-      <i class="fa-solid fa-cloud-arrow-up"></i> นำเข้าไฟล์
+    <label class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl text-sm font-black flex items-center gap-2 cursor-pointer shadow-xl shadow-indigo-500/20 transition-all active:scale-95">
+      <i class="fa-solid fa-file-arrow-up"></i> IMPORT EXCEL
       <input id="fileUpload" type="file" accept=".xlsx,.xls,.csv" class="hidden" multiple />
     </label>
 
-    <button onclick="forceSync()" class="bg-sky-500/20 text-sky-400 hover:bg-sky-500 hover:text-white border border-sky-500/50 px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
-      <i class="fa-solid fa-arrows-rotate"></i> บังคับซิงค์
-    </button>
-
-    <button onclick="hardReset()" class="bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30 hover:border-rose-500 px-4 py-2.5 rounded-xl text-xs font-bold transition-all">
-      <i class="fa-solid fa-trash-can"></i> ล้างขยะ
-    </button>
+    <div class="flex items-center gap-2">
+        <button onclick="forceSync()" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all" title="Force Cloud Sync">
+            <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+        <button onclick="hardReset()" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white transition-all" title="Clear All Data">
+            <i class="fa-solid fa-trash-can"></i>
+        </button>
+    </div>
   </div>
 </header>
 
-<div id="statusAlert" class="hidden mb-6 p-4 rounded-xl text-sm font-medium flex items-center justify-center gap-3 shadow-2xl z-50 fixed top-5 left-1/2 transform -translate-x-1/2 w-11/12 max-w-lg backdrop-blur-md transition-all duration-300"></div>
-
-<!-- Dropdown Filters -->
-<section class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-  <div class="glass-card p-3 px-4 flex items-center justify-between">
-    <label class="text-xs text-slate-400 uppercase font-bold w-1/3">กรองพนักงาน:</label>
-    <select id="employeeSelect" class="w-2/3 bg-black/20 border border-white/10 rounded-lg text-sm text-slate-200 py-1.5 px-3 outline-none focus:border-purple-500"></select>
-  </div>
-  <div class="glass-card p-3 px-4 flex items-center justify-between">
-    <label class="text-xs text-slate-400 uppercase font-bold w-1/3">กลุ่มงาน:</label>
-    <select id="jobTypeSelect" class="w-2/3 bg-black/20 border border-white/10 rounded-lg text-sm text-slate-200 py-1.5 px-3 outline-none focus:border-purple-500"></select>
-  </div>
-</section>
-
 <!-- Stats Grid -->
-<section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-  <div class="glass-card p-5 border-t-2 border-emerald-500 relative overflow-hidden">
-    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Success (S)</p>
-    <h3 id="successStat" class="text-4xl font-black text-emerald-400 relative z-10">0</h3>
-    <p class="text-[10px] text-slate-500 mt-1">งานที่สำเร็จ</p>
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+  <div class="glass-card p-6 border-l-4 border-emerald-500">
+    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2">Completed (S)</p>
+    <div class="flex items-baseline gap-2">
+        <h3 id="successStat" class="text-5xl font-black text-white">0</h3>
+        <span class="text-xs text-emerald-500 font-bold">Tasks</span>
+    </div>
   </div>
-  <div class="glass-card p-5 border-t-2 border-amber-500 relative overflow-hidden">
-    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Pending (P)</p>
-    <h3 id="pendingStat" class="text-4xl font-black text-amber-400 relative z-10">0</h3>
-    <p class="text-[10px] text-slate-500 mt-1">งานที่กำลังทำ</p>
+  <div class="glass-card p-6 border-l-4 border-amber-500">
+    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2">In Progress (P)</p>
+    <div class="flex items-baseline gap-2">
+        <h3 id="pendingStat" class="text-5xl font-black text-white">0</h3>
+        <span class="text-xs text-amber-500 font-bold">Tasks</span>
+    </div>
   </div>
-  <div class="glass-card p-5 border-t-2 border-slate-500 relative overflow-hidden">
-    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Not Run (N)</p>
-    <h3 id="notrunStat" class="text-4xl font-black text-slate-400 relative z-10">0</h3>
-    <p class="text-[10px] text-slate-500 mt-1">งานที่ยังไม่เริ่ม</p>
+  <div class="glass-card p-6 border-l-4 border-slate-600">
+    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2">Not Started (N)</p>
+    <div class="flex items-baseline gap-2">
+        <h3 id="notrunStat" class="text-5xl font-black text-white">0</h3>
+        <span class="text-xs text-slate-400 font-bold">Tasks</span>
+    </div>
   </div>
-  <div class="glass-card p-5 border-t-2 border-indigo-500 relative overflow-hidden">
-    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Routine Progress</p>
-    <h3 id="percentStat" class="text-4xl font-black text-indigo-400 relative z-10">0%</h3>
-    <p class="text-[10px] text-slate-500 mt-1">ความสำเร็จของงานประจำ</p>
+  <div class="glass-card p-6 border-l-4 border-indigo-500 bg-indigo-500/5">
+    <p class="text-[10px] text-indigo-400 uppercase font-black tracking-widest mb-2">Routine Accuracy</p>
+    <div class="flex items-baseline gap-2">
+        <h3 id="percentStat" class="text-5xl font-black text-white">0%</h3>
+    </div>
   </div>
 </section>
 
-<!-- Charts Section -->
-<section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    <div class="glass-card p-5 h-72 flex flex-col lg:col-span-1">
-        <h3 class="text-sm font-bold text-slate-200 mb-2 flex justify-between">
-            <span><i class="fa-solid fa-chart-pie text-indigo-400 mr-2"></i>ภาพรวมสถานะ</span>
-        </h3>
-        <div class="flex-1 relative w-full h-full flex items-center justify-center">
-            <canvas id="companyChart"></canvas>
+<!-- Filters & Charts Row -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-10">
+    <div class="xl:col-span-3 space-y-6">
+        <div class="glass-card p-6 space-y-6">
+            <h3 class="text-xs font-black text-white uppercase tracking-widest border-b border-white/5 pb-4">Global Filters</h3>
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-500 uppercase font-bold">Employee</label>
+                    <select id="employeeSelect" class="w-full bg-slate-900/50 border border-white/10 rounded-xl text-sm text-slate-200 py-3 px-4 outline-none focus:border-indigo-500 transition-colors"></select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-500 uppercase font-bold">Business Unit / Job Group</label>
+                    <select id="jobTypeSelect" class="w-full bg-slate-900/50 border border-white/10 rounded-xl text-sm text-slate-200 py-3 px-4 outline-none focus:border-indigo-500 transition-colors"></select>
+                </div>
+            </div>
+        </div>
+        <div class="glass-card p-6 aspect-square flex flex-col">
+            <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6">Status Ratio</h3>
+            <div class="flex-1 relative">
+                <canvas id="companyChart"></canvas>
+            </div>
         </div>
     </div>
-    <div class="glass-card p-5 h-72 flex flex-col lg:col-span-2">
-        <h3 class="text-sm font-bold text-slate-200 mb-2 flex justify-between">
-            <span><i class="fa-solid fa-users text-emerald-400 mr-2"></i>ความคืบหน้ารายบุคคล</span>
+    
+    <div class="xl:col-span-9 glass-card p-8 flex flex-col">
+        <h3 class="text-xs font-black text-white uppercase tracking-widest mb-8 flex justify-between items-center">
+            <span>Individual Performance Metrics</span>
+            <span class="text-[10px] text-slate-500 font-normal">Updated in Real-time</span>
         </h3>
-        <div class="flex-1 relative w-full h-full">
+        <div class="flex-1 min-h-[300px]">
             <canvas id="employeeChart"></canvas>
         </div>
     </div>
-</section>
+</div>
 
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-  <!-- Routine Tasks -->
-  <div class="xl:col-span-5 glass-card overflow-hidden flex flex-col h-[750px]">
-    <div class="p-4 bg-black/20 border-b border-white/5 flex justify-between items-center">
-        <h2 class="font-bold text-emerald-400 flex items-center gap-2">
-            <i class="fa-solid fa-calendar-check"></i> งานประจำ (Routine Matrix)
+<!-- Main Content Tables -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+  <!-- Routine Matrix -->
+  <div class="xl:col-span-5 glass-card overflow-hidden flex flex-col h-[850px]">
+    <div class="p-6 bg-white/5 border-b border-white/5 flex justify-between items-center">
+        <h2 class="font-black text-emerald-400 text-sm uppercase tracking-widest flex items-center gap-3">
+            <i class="fa-solid fa-calendar-check text-xl"></i> Routine Monitoring
         </h2>
-        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded font-bold" id="routineDateLabel"></span>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-black uppercase" id="routineDateLabel"></span>
     </div>
-    <div class="p-2 border-b border-white/5 bg-white/5 flex text-[10px] uppercase font-bold text-slate-500 tracking-widest text-center">
-        <div class="w-1/2 text-left pl-2">ชื่องาน (Task)</div>
-        <div class="w-1/4">พนักงาน</div>
-        <div class="w-1/4 pr-2">สถานะ</div>
+    <div id="routineContainer" class="p-6 space-y-6 overflow-y-auto flex-1">
+        <!-- Grouped Routine Tasks -->
     </div>
-    <div id="routineContainer" class="p-4 space-y-4 overflow-y-auto flex-1"></div>
   </div>
 
-  <!-- Right Column -->
-  <div class="xl:col-span-7 flex flex-col gap-6 h-[750px]">
-      <div class="glass-card overflow-hidden flex flex-col flex-1 border-sky-500/30">
-        <div class="p-4 bg-black/20 border-b border-sky-500/20 flex justify-between items-center">
-            <h2 class="font-bold text-sky-400 flex items-center gap-2">
-                <i class="fa-solid fa-list-check"></i> งานเฉพาะกิจ (Adhoc)
+  <!-- Adhoc & Compliant Column -->
+  <div class="xl:col-span-7 flex flex-col gap-8 h-[850px]">
+      <!-- Adhoc Section -->
+      <div class="glass-card overflow-hidden flex flex-col flex-1">
+        <div class="p-6 bg-white/5 border-b border-sky-500/20 flex justify-between items-center">
+            <h2 class="font-black text-sky-400 text-sm uppercase tracking-widest flex items-center gap-3">
+                <i class="fa-solid fa-bolt text-xl"></i> Adhoc Projects
             </h2>
         </div>
-        <div class="overflow-y-auto flex-1 p-2">
+        <div class="overflow-y-auto flex-1 p-4">
             <table class="w-full text-sm text-left">
-                <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/5 bg-black/10 sticky top-0 backdrop-blur-md z-10">
+                <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/5 sticky top-0 bg-slate-900/90 backdrop-blur z-10">
                     <tr>
-                        <th class="px-4 py-2">ชื่องาน (Job Name)</th>
-                        <th class="px-4 py-2">พนักงาน</th>
-                        <th class="px-4 py-2">กลุ่มงาน</th>
-                        <th class="px-4 py-2">Deadline</th>
-                        <th class="px-4 py-2 text-center">สถานะ</th>
+                        <th class="px-4 py-4">Task Name</th>
+                        <th class="px-4 py-4">Owner</th>
+                        <th class="px-4 py-4">Deadline</th>
+                        <th class="px-4 py-4 text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody id="adhocTableBody" class="divide-y divide-white/5"></tbody>
@@ -188,21 +195,21 @@
         </div>
       </div>
 
-      <div class="glass-card overflow-hidden flex flex-col flex-1 border-rose-500/30">
-        <div class="p-4 bg-black/20 border-b border-rose-500/20 flex justify-between items-center">
-            <h2 class="font-bold text-rose-400 flex items-center gap-2">
-                <i class="fa-solid fa-triangle-exclamation"></i> ระบบร้องเรียน (Compliant)
+      <!-- Compliant Section -->
+      <div class="glass-card overflow-hidden flex flex-col flex-1">
+        <div class="p-6 bg-white/5 border-b border-rose-500/20 flex justify-between items-center">
+            <h2 class="font-black text-rose-400 text-sm uppercase tracking-widest flex items-center gap-3">
+                <i class="fa-solid fa-headset text-xl"></i> Complaints Management
             </h2>
         </div>
-        <div class="overflow-y-auto flex-1 p-2">
+        <div class="overflow-y-auto flex-1 p-4">
             <table class="w-full text-sm text-left">
-                <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/5 bg-black/10 sticky top-0 backdrop-blur-md z-10">
+                <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/5 sticky top-0 bg-slate-900/90 backdrop-blur z-10">
                     <tr>
-                        <th class="px-4 py-2">เคสร้องเรียน</th>
-                        <th class="px-4 py-2">พนักงาน</th>
-                        <th class="px-4 py-2">กลุ่มงาน</th>
-                        <th class="px-4 py-2">Deadline</th>
-                        <th class="px-4 py-2 text-center">สถานะ</th>
+                        <th class="px-4 py-4">Subject</th>
+                        <th class="px-4 py-4">Assignee</th>
+                        <th class="px-4 py-4">Deadline</th>
+                        <th class="px-4 py-4 text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody id="compliantTableBody" class="divide-y divide-white/5"></tbody>
@@ -212,11 +219,14 @@
   </div>
 </div>
 
+<!-- Alert Box -->
+<div id="statusAlert" class="hidden z-[100] fixed top-8 left-1/2 -translate-x-1/2 w-full max-w-md p-4 rounded-2xl shadow-2xl flex items-center gap-4 border animate-bounce"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// 🔴🔴🔴 1. โค้ด Firebase Config ใหม่ของคุณ 🔴🔴🔴
+// 🔴 CONFIGURATION 🔴
 const firebaseConfig = {
   apiKey: "AIzaSyB12236YZUpI4-I-q8dlK4cEr6AF2YJCko",
   authDomain: "dashboard-38b45.firebaseapp.com",
@@ -225,515 +235,384 @@ const firebaseConfig = {
   messagingSenderId: "163619936500",
   appId: "1:163619936500:web:d7392f55f433e2d1d326a1"
 };
-// 🔴🔴🔴 สิ้นสุดส่วนที่ต้องแก้ไข 🔴🔴🔴
 
-let app, db;
-try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-} catch (error) {
-    console.error("Firebase Initialization Error:", error);
-    alert("ไม่สามารถเชื่อมต่อ Firebase ได้ กรุณาตรวจสอบ Config ใหม่");
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-const DB_KEY = 'Executive_Dash_V18_Ultimate'; 
-const appState = { tasks: [], selectedDate: '', filters: { employee: 'all', jobType: 'all' }, staffMap: {} };
+const appState = { 
+    tasks: [], 
+    selectedDate: '', 
+    filters: { employee: 'all', jobType: 'all' }, 
+    staffMap: {} 
+};
 
 let chartCompany = null;
 let chartEmployee = null;
 Chart.defaults.color = '#94a3b8';
-Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+Chart.defaults.font.family = "'Anuphan', sans-serif";
 
 const el = id => document.getElementById(id);
-let isInitialLoad = true; 
+let isInitialLoad = true;
 
 function init() {
+    // Set default date
     const todayStr = new Date().toISOString().slice(0, 10);
     appState.selectedDate = todayStr;
     el('dateFilter').value = todayStr;
 
-    const savedLogo = localStorage.getItem('ExecDash_Logo_Client');
+    // Load Local Customization
+    const savedLogo = localStorage.getItem('ExecDash_Logo_Final');
     if(savedLogo) el('companyLogoImg').src = savedLogo;
-    const savedName = localStorage.getItem('ExecDash_CompanyName_Client');
+    const savedName = localStorage.getItem('ExecDash_Name_Final');
     if(savedName) el('companyNameText').innerText = savedName;
 
-    if (!db) return;
+    // Firebase Real-time Listener
+    onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
+        const badge = el('connectionBadge');
+        badge.innerHTML = `<i class="fa-solid fa-wifi mr-1 text-emerald-400"></i> Connected`;
+        badge.className = "text-[10px] bg-emerald-500/10 px-3 py-1.5 rounded-full uppercase font-bold text-emerald-400 align-middle";
 
-    // ระบบดึงข้อมูลจาก Cloud
-    try {
-        onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
-            const badge = el('connectionBadge');
-            badge.className = "text-[10px] bg-emerald-600 px-2 py-1 rounded-full uppercase tracking-widest text-white align-middle";
-            badge.innerHTML = `<i class="fa-solid fa-wifi mr-1"></i> Real-time Active`;
-
-            if (docSnap.exists()) {
-                const remoteData = docSnap.data();
-                appState.tasks = remoteData.tasks || [];
-                appState.staffMap = remoteData.staffMap || {};
-                
-                updateDropdowns();
-                renderUI();
-                
-                if (!isInitialLoad) {
-                    showAlert(`ซิงค์สำเร็จ! อัปเดตข้อมูลจากระบบส่วนกลางแล้ว`, 'emerald', 'fa-cloud-arrow-down');
-                }
-                isInitialLoad = false;
-            } else {
-                console.log("ยังไม่มีข้อมูลบน Cloud");
-                isInitialLoad = false;
-                renderUI(); // แสดงหน้าว่างเปล่าไปก่อน
-            }
-        }, (error) => {
-            console.error("Firebase Sync Error: ", error);
-            const badge = el('connectionBadge');
-            badge.className = "text-[10px] bg-rose-600 px-2 py-1 rounded-full uppercase tracking-widest text-white align-middle";
-            badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Offline`;
+        if (docSnap.exists()) {
+            const remoteData = docSnap.data();
+            appState.tasks = remoteData.tasks || [];
+            appState.staffMap = remoteData.staffMap || {};
             
-            // ตรวจสอบ Error กรณีที่เจอบ่อยที่สุด (ลืมเปิด Test Mode)
-            if(error.message.includes("Missing or insufficient permissions")) {
-                showAlert('กรุณาไปที่ Firebase -> Firestore Database -> Rules แล้วแก้ "allow read, write: if false;" เป็น "if true;"', 'rose', 'fa-lock');
-            } else {
-                showAlert('เชื่อมต่อฐานข้อมูลขัดข้อง (ใช้งานแบบ Offline)', 'rose', 'fa-wifi');
-            }
-        });
-    } catch (e) {
-        console.error("Firestore error:", e);
-    }
+            updateDropdowns();
+            renderUI();
+            
+            if (!isInitialLoad) showAlert('Database Synced Successfully', 'emerald', 'fa-cloud-arrow-down');
+            isInitialLoad = false;
+        } else {
+            isInitialLoad = false;
+            renderUI();
+        }
+    }, (error) => {
+        const badge = el('connectionBadge');
+        badge.innerHTML = `<i class="fa-solid fa-lock mr-1"></i> Access Denied`;
+        badge.className = "text-[10px] bg-rose-500/10 px-3 py-1.5 rounded-full uppercase font-bold text-rose-400 align-middle";
+        showAlert('Cloud Connection Failed. Please check Firebase Rules.', 'rose', 'fa-triangle-exclamation');
+    });
 }
 
-function saveTasksToCloud(showProgress = true) {
-    if (!db) return;
-    if (showProgress) showAlert('กำลังบันทึกข้อมูลขึ้นระบบ Cloud...', 'amber', 'fa-spinner fa-spin');
+function saveToCloud(showNotif = true) {
+    if (showNotif) showAlert('Syncing with Cloud...', 'amber', 'fa-spinner fa-spin');
     
-    // สำรองไว้ในเครื่องด้วย
-    localStorage.setItem(DB_KEY, JSON.stringify({ tasks: appState.tasks, staffMap: appState.staffMap }));
+    // Cleanup data for Firestore
+    const cleanData = JSON.parse(JSON.stringify({ 
+        tasks: appState.tasks, 
+        staffMap: appState.staffMap, 
+        lastUpdated: Date.now() 
+    }));
 
-    // ทำความสะอาดข้อมูลก่อนส่งขึ้น Firebase เพื่อป้องกัน Error
-    const rawData = { tasks: appState.tasks, staffMap: appState.staffMap, lastUpdated: new Date().getTime() };
-    const cleanDataToSync = JSON.parse(JSON.stringify(rawData)); 
-
-    setDoc(doc(db, "dashboard", "mainData"), cleanDataToSync)
-        .then(() => {
-            if (showProgress) showAlert(`บันทึกสำเร็จ! ข้อมูล ${appState.tasks.length} รายการ ออนไลน์แล้ว`, 'sky', 'fa-cloud-arrow-up');
-        })
-        .catch(err => {
-            console.error("Firebase Save Error:", err);
-            showAlert('บันทึกผิดพลาด: ' + err.message, 'rose', 'fa-triangle-exclamation');
-        });
+    setDoc(doc(db, "dashboard", "mainData"), cleanData)
+        .then(() => { if (showNotif) showAlert('Cloud Save Complete', 'emerald', 'fa-check-circle'); })
+        .catch(err => { showAlert('Sync Error: ' + err.message, 'rose', 'fa-xmark'); });
 }
 
-// ผูกฟังก์ชันเข้ากับ Window เพื่อให้ HTML เรียกใช้ได้
-window.clearDateFilter = function() {
-    el('dateFilter').value = ''; 
-    appState.selectedDate = '';  
-    renderUI();
-    showAlert('กำลังแสดงงานของ "ทุกวัน" ที่มีอยู่ในระบบ', 'indigo', 'fa-calendar-check');
+// Global UI Actions
+window.clearDateFilter = () => { el('dateFilter').value = ''; appState.selectedDate = ''; renderUI(); };
+window.forceSync = () => saveToCloud(true);
+window.hardReset = () => { if(confirm('Erase ALL Cloud Data?')) { setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {} }); location.reload(); } };
+window.changeTaskStatus = (id, status) => { const t = appState.tasks.find(x => x.id === id); if(t) { t.status = status; saveToCloud(false); renderUI(); } };
+window.toggleAccordion = (header) => {
+    const content = header.nextElementSibling;
+    const icon = header.querySelector('.fa-chevron-down');
+    content.classList.toggle('hidden');
+    icon.style.transform = content.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)";
 };
 
-window.forceSync = function() {
-    if(appState.tasks.length === 0) {
-        showAlert('ไม่มีข้อมูลให้ซิงค์ (ต้องอัปโหลดไฟล์ Excel ก่อน)', 'amber', 'fa-circle-info');
-        return;
-    }
-    saveTasksToCloud(true);
-};
-
-window.hardReset = function() { 
-    if(confirm('คำเตือน: นี่คือการล้างข้อมูลขยะทั้งหมดบนระบบคลาวด์ ยืนยันหรือไม่?')) { 
-        if(db) setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {}, lastUpdated: new Date().getTime() });
-        location.reload(); 
-    } 
-};
-
-window.changeTaskStatus = function(taskId, newStatus) {
-    const task = appState.tasks.find(t => t.id === taskId);
-    if (task) { 
-        task.status = newStatus; 
-        saveTasksToCloud(false); // เซฟขึ้นคลาวด์เงียบๆ แบบไม่ต้องมีหน้าต่างเด้งกวนใจ
-        renderUI(); 
-    }
-};
-
-window.toggleAccordion = function(headerElement) {
-    const content = headerElement.nextElementSibling;
-    const icon = headerElement.querySelector('.fa-chevron-down');
-    if (content.classList.contains('hidden')) {
-        content.classList.remove('hidden');
-        icon.style.transform = "rotate(180deg)";
-    } else {
-        content.classList.add('hidden');
-        icon.style.transform = "rotate(0deg)";
-    }
-};
-
-el('logoUpload').addEventListener('change', (e) => {
-    const f = e.target.files[0];
-    if (f) {
-        const r = new FileReader();
-        r.onload = (evt) => { el('companyLogoImg').src = evt.target.result; localStorage.setItem('ExecDash_Logo_Client', evt.target.result); };
-        r.readAsDataURL(f);
-    }
-});
-el('companyNameText').addEventListener('blur', (e) => { localStorage.setItem('ExecDash_CompanyName_Client', e.target.innerText); });
-
-function showAlert(msg, color, icon='fa-info-circle') {
-    const alert = el('statusAlert');
-    alert.className = `mb-6 p-4 rounded-xl text-sm font-bold flex items-center justify-center gap-3 bg-${color}-500/90 text-white border border-${color}-400/50 shadow-2xl z-50 fixed top-5 left-1/2 transform -translate-x-1/2 w-11/12 max-w-lg backdrop-blur-md transition-all duration-300`;
-    alert.innerHTML = `<i class="fa-solid ${icon} text-xl"></i> <span>${msg}</span>`;
-    alert.classList.remove('hidden');
-    setTimeout(() => { alert.classList.add('hidden'); }, 4000);
-}
-
+// File Processing Logic
 function parseDateKey(k) {
     if (!k) return null;
-    let strK = String(k).trim();
-    if (strK.match(/^\d{4}-\d{2}-\d{2}$/)) return strK;
-    const num = parseFloat(strK);
-    if (!isNaN(num) && num > 30000 && num < 70000 && !strK.includes('-') && !strK.includes('/')) {
-        const d = new Date(Math.round((num - 25569) * 86400 * 1000));
-        return d.toISOString().slice(0, 10);
+    let s = String(k).trim();
+    if (s.match(/^\d{4}-\d{2}-\d{2}$/)) return s;
+    const n = parseFloat(s);
+    if (!isNaN(n) && n > 40000 && n < 60000) {
+        return new Date(Math.round((n - 25569) * 86400 * 1000)).toISOString().slice(0, 10);
     }
     return null;
 }
 
-function processFileContent(workbook, fileName) {
-    let allData = [];
-    let staffDictionary = appState.staffMap || {};
-    let companyNameFound = "";
+function processWorkbook(wb, fileName) {
+    let parsed = [];
+    let staff = appState.staffMap || {};
 
-    workbook.SheetNames.forEach(sheetName => {
-        const sNameLower = sheetName.toLowerCase();
-        if (sNameLower.includes('master') || fileName.toLowerCase().includes('master')) {
-            const rawArray = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
-            if (rawArray.length > 0) {
-                rawArray.forEach((row, rIdx) => {
-                    row.forEach((cell, cIdx) => {
-                        let text = String(cell).trim().toLowerCase();
-                        if(text === 'company name') companyNameFound = String(row[cIdx+1] || '').trim();
-                        if (rIdx > 0 && String(row[0]).startsWith('ST')) {
-                            let code = String(row[0]).trim();
-                            let name = String(row[1] || '').trim();
-                            if(code) {
-                                let fullName = name ? `${code} (${name})` : code;
-                                staffDictionary[code] = fullName;
-                                if(name) staffDictionary[name] = fullName; 
-                            }
-                        }
-                    });
-                });
-            }
-        }
-    });
-
-    if (companyNameFound) {
-        el('companyNameText').innerText = companyNameFound;
-        localStorage.setItem('ExecDash_CompanyName_Client', companyNameFound);
-    }
-    appState.staffMap = staffDictionary;
-
-    workbook.SheetNames.forEach(sheetName => {
-        const sLower = sheetName.toLowerCase();
+    wb.SheetNames.forEach(sheetName => {
+        const sLower = sheetName.toLowerCase().replace(/\s/g, '');
         const fLower = fileName.toLowerCase();
-        if (sLower.includes('master') || fLower.includes('master')) return;
+        const raw = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
+        if (!raw.length) return;
 
-        let finalCategory = 'Adhoc';
-        if (sLower.includes('group') || sLower.includes('routine') || fLower.includes('group')) finalCategory = 'Routine';
-        else if (sLower.includes('compliant') || sLower.includes('ร้องเรียน') || fLower.includes('compliant')) finalCategory = 'Compliant';
+        // Master Data Detection
+        if (sLower.includes('master') || fLower.includes('master')) {
+            raw.forEach(row => {
+                const code = String(row[0] || '').trim();
+                const name = String(row[1] || '').trim();
+                if (code.startsWith('ST')) {
+                    staff[code] = name ? `${code} (${name})` : code;
+                    if(name) staff[name] = `${code} (${name})`;
+                }
+                // Company Name detection
+                row.forEach((cell, idx) => { if(String(cell).toLowerCase().includes('company name')) el('companyNameText').innerText = String(row[idx+1] || '').trim(); });
+            });
+            return;
+        }
 
-        const rawRows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '', raw: false });
-        if (rawRows.length === 0) return;
+        // Detect Categorization
+        let category = 'Adhoc';
+        if (sLower.includes('group') || sLower.includes('monitoring') || sLower.includes('routine')) category = 'Routine';
+        else if (sLower.includes('compliant') || sLower.includes('ร้องเรียน')) category = 'Compliant';
 
-        const keysSample = Object.keys(rawRows[0] || {});
-        const isMatrix = keysSample.some(k => parseDateKey(k));
+        const jsonRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+        if (!jsonRows.length) return;
 
-        rawRows.forEach(row => {
-            const keys = Object.keys(row);
-            const findKey = (searchStrings) => keys.find(k => searchStrings.some(s => String(k).toLowerCase().replace(/\s/g, '').includes(s)));
+        const headers = Object.keys(jsonRows[0]);
+        const findKey = (arr) => headers.find(h => arr.some(a => h.toLowerCase().replace(/\s/g, '').includes(a)));
 
-            if (finalCategory === 'Routine' && isMatrix) {
-                const taskKey = findKey(['task', 'ชื่องาน', 'jobname']);
-                const ownerKey = findKey(['onwer', 'owner', 'พนักงาน']);
-                
-                if (!taskKey) return;
-                const taskName = String(row[taskKey]).trim();
-                if (!taskName || taskName === 'ไม่ระบุ') return;
+        const taskKey = findKey(['task', 'ชื่องาน', 'jobname']);
+        const ownerKey = findKey(['owner', 'onwer', 'พนักงาน', 'staff']); // Fixes "Onwer" typo
+        const deadlineKey = findKey(['deadline', 'กำหนดส่ง', 'date']);
+        const statusKey = findKey(['status', 'สถานะ']);
 
-                const rawOwner = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
-                const ownerFormatted = staffDictionary[rawOwner] || rawOwner;
-                const jobType = sLower.includes('sheet') ? fileName.replace('.csv','').replace('.xlsx','') : sheetName;
+        if (!taskKey) return;
 
-                keys.forEach(k => {
-                    const pDate = parseDateKey(k);
-                    if (pDate) {
-                        const val = String(row[k]).trim().toUpperCase();
+        jsonRows.forEach(row => {
+            const taskName = String(row[taskKey]).trim();
+            if (!taskName || taskName === 'ไม่ระบุ') return;
+
+            const ownerRaw = ownerKey ? String(row[ownerKey]).trim() : 'Unassigned';
+            const ownerName = staff[ownerRaw] || ownerRaw;
+            const jobType = sLower.includes('sheet') ? fileName.split('.')[0] : sheetName;
+
+            if (category === 'Routine') {
+                // Matrix Parsing
+                headers.forEach(h => {
+                    const dKey = parseDateKey(h);
+                    if (dKey) {
+                        const val = String(row[h]).trim().toUpperCase();
                         if (val) {
                             let status = 'not run';
-                            if (val === 'S' || val === 'SUCCESS') status = 'done';
-                            else if (val === 'P' || val === 'PENDING') status = 'pending';
-                            else if (val === 'N') status = 'not run';
-
-                            allData.push({
-                                id: `R${Date.now()}${Math.random().toString(36).substr(2,5)}`,
-                                category: 'Routine', jobType: jobType, taskName: taskName, ownerName: ownerFormatted, date: pDate, status: status
+                            if (val === 'S') status = 'done';
+                            else if (val === 'P') status = 'pending';
+                            
+                            parsed.push({
+                                id: `R-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
+                                category, jobType, taskName, ownerName, date: dKey, status
                             });
                         }
                     }
                 });
-
             } else {
-                const taskKey = findKey(['jobname', 'task', 'ชื่องาน']);
-                const ownerKey = findKey(['owner', 'onwer', 'พนักงาน']);
-                const deadlineKey = findKey(['deadline', 'กำหนดส่ง']);
-                const receiveKey = findKey(['receive', 'วันที่รับ']);
-                const statusKey = findKey(['status', 'สถานะ']);
-
-                if (!taskKey) return;
-                const taskName = String(row[taskKey]).trim();
-                if (!taskName || taskName === 'ไม่ระบุ') return;
-
-                const rawOwner = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
-                const ownerFormatted = staffDictionary[rawOwner] || rawOwner;
-                const jobType = sLower.includes('sheet') ? fileName.replace('.csv','').replace('.xlsx','') : sheetName;
-
-                let parsedDeadline = deadlineKey ? parseDateKey(row[deadlineKey]) : '';
-                let parsedReceive = receiveKey ? parseDateKey(row[receiveKey]) : parsedDeadline;
-
-                const statusVal = statusKey ? String(row[statusKey]).toUpperCase() : '';
+                // List Parsing
+                const dKey = deadlineKey ? parseDateKey(row[deadlineKey]) : '';
+                const sVal = statusKey ? String(row[statusKey]).toUpperCase() : '';
                 let status = 'not run';
-                if (statusVal.includes('SUCCESS') || statusVal === 'S') status = 'done';
-                else if (statusVal.includes('PENDING') || statusVal === 'P' || statusVal.includes('OVERDUE')) status = 'pending';
+                if (sVal.includes('SUCCESS') || sVal === 'S') status = 'done';
+                else if (sVal.includes('PENDING') || sVal === 'P' || sVal.includes('OVERDUE')) status = 'pending';
 
-                allData.push({
-                    id: `A${Date.now()}${Math.random().toString(36).substr(2,5)}`,
-                    category: finalCategory, jobType: jobType, taskName: taskName, ownerName: ownerFormatted, 
-                    date: parsedDeadline, receiveDate: parsedReceive, status: status
+                parsed.push({
+                    id: `A-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
+                    category, jobType, taskName, ownerName, date: dKey, status
                 });
             }
         });
     });
-    return allData;
+    
+    appState.staffMap = staff;
+    return parsed;
 }
 
-el('fileUpload').addEventListener('change', async (e) => {
+el('fileUpload').onchange = async (e) => {
     const files = e.target.files;
     if (!files.length) return;
     
-    let newlyParsedTasks = [];
-    for(let i=0; i<files.length; i++) {
-        const file = files[i];
-        const data = await file.arrayBuffer();
-        const wb = XLSX.read(data, { type: 'array' });
-        const tasks = processFileContent(wb, file.name);
-        newlyParsedTasks = [...newlyParsedTasks, ...tasks];
+    let allNewTasks = [];
+    for(let f of files) {
+        const buf = await f.arrayBuffer();
+        const wb = XLSX.read(buf, { type: 'array' });
+        allNewTasks = [...allNewTasks, ...processWorkbook(wb, f.name)];
     }
-    
-    if (newlyParsedTasks.length === 0) {
-        showAlert('นำเข้าไม่สำเร็จ: ไม่พบข้อมูล', 'rose', 'fa-triangle-exclamation');
-        return;
-    }
-    
-    appState.tasks = [...appState.tasks, ...newlyParsedTasks];
-    const uniqueTasks = [];
-    const map = new Map();
-    for (const item of appState.tasks) {
-        const uniqueKey = `${item.taskName}-${item.ownerName}-${item.date}-${item.jobType}`;
-        if(!map.has(uniqueKey)){
-            map.set(uniqueKey, true);
-            uniqueTasks.push(item);
-        }
-    }
-    appState.tasks = uniqueTasks;
 
-    updateDropdowns();
-    renderUI();
-    saveTasksToCloud(true); 
-    e.target.value = ''; 
-});
+    // Merge & Dedup
+    const existingMap = new Map(appState.tasks.map(t => [`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t]));
+    allNewTasks.forEach(t => existingMap.set(`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t));
+    appState.tasks = Array.from(existingMap.values());
 
-el('dateFilter').addEventListener('change', (e) => { 
-    appState.selectedDate = e.target.value; 
-    renderUI(); 
-});
-el('employeeSelect').addEventListener('change', (e) => { appState.filters.employee = e.target.value; renderUI(); });
-el('jobTypeSelect').addEventListener('change', (e) => { appState.filters.jobType = e.target.value; renderUI(); });
+    saveToCloud(true);
+    e.target.value = '';
+};
 
 function updateDropdowns() {
     const emps = [...new Set(appState.tasks.map(t => t.ownerName))].sort();
-    el('employeeSelect').innerHTML = '<option value="all">พนักงานทุกคน</option>' + emps.map(name => `<option value="${name}">${name}</option>`).join('');
+    el('employeeSelect').innerHTML = '<option value="all">Everyone</option>' + emps.map(n => `<option value="${n}">${n}</option>`).join('');
     const types = [...new Set(appState.tasks.map(t => t.jobType))].sort();
-    el('jobTypeSelect').innerHTML = '<option value="all">ทุกกลุ่มงาน</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+    el('jobTypeSelect').innerHTML = '<option value="all">All Groups</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
 }
 
-function renderCharts(dayTasks) {
-    let cDone = 0, cPending = 0, cNotRun = 0;
-    const empData = {};
+function renderUI() {
+    const { employee, jobType } = appState.filters;
+    const target = appState.selectedDate;
 
-    dayTasks.forEach(t => {
-        if(t.status === 'done') cDone++;
-        else if(t.status === 'pending') cPending++;
-        else cNotRun++;
-
-        if (!empData[t.ownerName]) empData[t.ownerName] = { done: 0, pending: 0, notrun: 0 };
-        if (t.status === 'done') empData[t.ownerName].done++;
-        else if (t.status === 'pending') empData[t.ownerName].pending++;
-        else empData[t.ownerName].notrun++;
+    const filtered = appState.tasks.filter(t => {
+        const matchEmp = employee === 'all' || t.ownerName === employee;
+        const matchJob = jobType === 'all' || t.jobType === jobType;
+        const matchDate = !target || t.date === target || t.category !== 'Routine';
+        return matchEmp && matchJob && matchDate;
     });
+
+    // Stats
+    let s=0, p=0, n=0;
+    filtered.forEach(t => { if(t.status==='done') s++; else if(t.status==='pending') p++; else n++; });
+    el('successStat').innerText = s; el('pendingStat').innerText = p; el('notrunStat').innerText = n;
+    
+    const routines = filtered.filter(t => t.category === 'Routine');
+    const rDone = routines.filter(t => t.status === 'done').length;
+    el('percentStat').innerText = routines.length ? `${Math.round((rDone/routines.length)*100)}%` : '0%';
+    el('routineDateLabel').innerText = target ? `Date: ${target}` : 'Overview: All Dates';
+
+    // Lists
+    const adhoc = filtered.filter(t => t.category === 'Adhoc');
+    const comp = filtered.filter(t => t.category === 'Compliant');
+    el('adhocTableBody').innerHTML = renderRows(adhoc);
+    el('compliantTableBody').innerHTML = renderRows(comp);
+
+    // Routine Matrix
+    renderRoutineMatrix(routines);
+    renderCharts(filtered);
+}
+
+function renderRows(tasks) {
+    if(!tasks.length) return '<tr><td colspan="4" class="py-12 text-center text-slate-600 font-bold uppercase tracking-widest text-[10px]">No Records Found</td></tr>';
+    return tasks.map(t => `
+        <tr class="hover:bg-white/5 transition-colors">
+            <td class="px-4 py-4"><div class="text-xs font-bold ${t.status==='done'?'text-slate-500 line-through':'text-white'} truncate w-48">${t.taskName}</div></td>
+            <td class="px-4 py-4 text-[10px] text-indigo-400 font-black">${t.ownerName}</td>
+            <td class="px-4 py-4 text-[10px] text-slate-500 font-mono">${t.date || '-'}</td>
+            <td class="px-4 py-4 text-center">
+                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-slate-900 border ${t.status==='done'?'border-emerald-500/50 text-emerald-400':'border-white/10 text-slate-400'} text-[10px] rounded-lg py-1 pl-2 pr-6 outline-none font-black">
+                    <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
+                    <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
+                    <option value="done" ${t.status==='done'?'selected':''}>S</option>
+                </select>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderRoutineMatrix(tasks) {
+    const cont = el('routineContainer');
+    if(!tasks.length) {
+        cont.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-700"><i class="fa-regular fa-folder-open text-4xl mb-4"></i><p class="text-[10px] font-black uppercase">Select a date to view routines</p></div>`;
+        return;
+    }
+    
+    const groups = {};
+    tasks.forEach(t => { if(!groups[t.jobType]) groups[t.jobType] = []; groups[t.jobType].push(t); });
+
+    cont.innerHTML = Object.keys(groups).map(name => {
+        const g = groups[name];
+        const done = g.filter(x => x.status === 'done').length;
+        const pct = Math.round((done / g.length) * 100);
+        return `
+        <div class="bg-slate-900/40 rounded-2xl border border-white/5 overflow-hidden shadow-xl">
+            <div class="p-5 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors" onclick="toggleAccordion(this)">
+                <div class="flex-1">
+                    <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">${name}</h4>
+                    <div class="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
+                        <div class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct}%"></div>
+                    </div>
+                </div>
+                <div class="ml-6 text-right">
+                    <span class="text-lg font-black text-white block">${pct}%</span>
+                    <i class="fa-solid fa-chevron-down text-slate-600 text-[10px] transition-transform"></i>
+                </div>
+            </div>
+            <div class="p-2 space-y-1">
+                ${g.map(t => `
+                    <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group">
+                        <div class="flex-1 min-w-0 pr-4">
+                            <p class="text-[11px] font-bold ${t.status==='done'?'text-slate-600 line-through':'text-slate-200'} truncate">${t.taskName}</p>
+                            <span class="text-[9px] text-slate-500 font-black uppercase">${t.ownerName}</span>
+                        </div>
+                        <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-slate-900/80 border ${t.status==='done'?'border-emerald-500/30 text-emerald-400':'border-white/5 text-slate-500'} text-[9px] rounded-lg py-1 pl-2 pr-6 outline-none font-black">
+                            <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
+                            <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
+                            <option value="done" ${t.status==='done'?'selected':''}>S</option>
+                        </select>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        `;
+    }).join('');
+}
+
+function renderCharts(tasks) {
+    const done = tasks.filter(t => t.status === 'done').length;
+    const pend = tasks.filter(t => t.status === 'pending').length;
+    const notr = tasks.filter(t => t.status === 'not run').length;
 
     if (chartCompany) chartCompany.destroy();
     chartCompany = new Chart(el('companyChart'), {
         type: 'doughnut',
         data: {
             labels: ['Success', 'Pending', 'Not Run'],
-            datasets: [{ data: [cDone, cPending, cNotRun], backgroundColor: ['#10b981', '#f59e0b', '#64748b'], borderWidth: 0 }]
+            datasets: [{ data: [done, pend, notr], backgroundColor: ['#10b981', '#f59e0b', '#334155'], borderWidth: 0, hoverOffset: 15 }]
         },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'right', labels: { color: '#cbd5e1', font:{size:10} } } } }
+        options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false } } }
     });
 
-    const empNames = Object.keys(empData);
+    const empStats = {};
+    tasks.forEach(t => {
+        if(!empStats[t.ownerName]) empStats[t.ownerName] = { s:0, p:0, n:0 };
+        if(t.status==='done') empStats[t.ownerName].s++;
+        else if(t.status==='pending') empStats[t.ownerName].p++;
+        else empStats[t.ownerName].n++;
+    });
+
+    const labels = Object.keys(empStats);
     if (chartEmployee) chartEmployee.destroy();
     chartEmployee = new Chart(el('employeeChart'), {
         type: 'bar',
         data: {
-            labels: empNames.length ? empNames : ['ไม่มีข้อมูล'],
+            labels,
             datasets: [
-                { label: 'S', data: empNames.map(n => empData[n].done), backgroundColor: '#10b981', borderRadius: 2 },
-                { label: 'P', data: empNames.map(n => empData[n].pending), backgroundColor: '#f59e0b', borderRadius: 2 },
-                { label: 'N', data: empNames.map(n => empData[n].notrun), backgroundColor: '#64748b', borderRadius: 2 }
+                { label: 'S', data: labels.map(l => empStats[l].s), backgroundColor: '#10b981', borderRadius: 6 },
+                { label: 'P', data: labels.map(l => empStats[l].p), backgroundColor: '#f59e0b', borderRadius: 6 },
+                { label: 'N', data: labels.map(l => empStats[l].n), backgroundColor: '#334155', borderRadius: 6 }
             ]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            scales: { x: { stacked: true, grid: { display: false }, ticks:{font:{size:10}} }, y: { stacked: true, beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } } },
-            plugins: { legend: { position: 'top', align: 'end', labels:{boxWidth:10, font:{size:10}} } }
+            scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' } } },
+            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, font: { weight: 'bold', size: 10 } } } }
         }
     });
 }
 
-function renderUI() {
-    const { employee, jobType } = appState.filters;
-    const targetDate = appState.selectedDate; 
+function showAlert(msg, color, icon) {
+    const a = el('statusAlert');
+    a.className = `z-[100] fixed top-8 left-1/2 -translate-x-1/2 w-full max-w-md p-5 rounded-2xl shadow-2xl flex items-center gap-4 bg-${color}-500/90 text-white border-${color}-400/50 backdrop-blur-xl animate-bounce`;
+    a.innerHTML = `<i class="fa-solid ${icon} text-2xl"></i> <div class="font-black text-sm uppercase tracking-widest">${msg}</div>`;
+    a.classList.remove('hidden');
+    setTimeout(() => a.classList.add('hidden'), 3500);
+}
 
-    let dateFilteredTasks = appState.tasks.filter(t => {
-        if (!targetDate) return true; 
-        
-        if(t.category === 'Routine') return t.date === targetDate;
-        if(t.category === 'Adhoc' || t.category === 'Compliant') {
-            if(!t.date && !t.receiveDate) return true;
-            const start = t.receiveDate || t.date;
-            return start <= targetDate && (t.status !== 'done' || t.date >= targetDate);
-        }
-        return true;
-    });
+el('employeeSelect').onchange = (e) => { appState.filters.employee = e.target.value; renderUI(); };
+el('jobTypeSelect').onchange = (e) => { appState.filters.jobType = e.target.value; renderUI(); };
+el('dateFilter').onchange = (e) => { appState.selectedDate = e.target.value; renderUI(); };
 
-    const finalFiltered = dateFilteredTasks.filter(t => 
-        (employee === 'all' || t.ownerName === employee) && 
-        (jobType === 'all' || t.jobType === jobType)
-    );
-
-    renderCharts(finalFiltered);
-
-    let countS = 0, countP = 0, countN = 0;
-    finalFiltered.forEach(t => {
-        if(t.status === 'done') countS++;
-        else if(t.status === 'pending') countP++;
-        else countN++;
-    });
-
-    el('successStat').innerText = countS;
-    el('pendingStat').innerText = countP;
-    el('notrunStat').innerText = countN;
-    
-    const totalRoutine = finalFiltered.filter(t => t.category === 'Routine').length;
-    const doneRoutine = finalFiltered.filter(t => t.category === 'Routine' && t.status === 'done').length;
-    el('percentStat').innerText = totalRoutine ? `${Math.round((doneRoutine/totalRoutine)*100)}%` : '0%';
-
-    el('routineDateLabel').innerText = targetDate ? `วันที่: ${targetDate}` : 'แสดงงานทุกวันที่มีในระบบ';
-
-    const routineTasks = finalFiltered.filter(t => t.category === 'Routine');
-    const rCont = el('routineContainer');
-    
-    if(routineTasks.length === 0) {
-        rCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-500 opacity-60 py-20"><i class="fa-regular fa-folder-open text-4xl mb-3"></i><p class="text-sm font-bold uppercase">ไม่มีงาน Routine (ลองกดปุ่ม 'ดูทั้งหมด')</p></div>`;
-    } else {
-        const groupedRoutine = {};
-        routineTasks.forEach(t => { if(!groupedRoutine[t.jobType]) groupedRoutine[t.jobType] = []; groupedRoutine[t.jobType].push(t); });
-
-        rCont.innerHTML = Object.keys(groupedRoutine).map(jobName => {
-            const tasksInJob = groupedRoutine[jobName];
-            const doneInJob = tasksInJob.filter(t => t.status === 'done').length;
-            const progressPct = Math.round((doneInJob / tasksInJob.length) * 100);
-            
-            return `
-            <div class="bg-black/20 rounded-xl border border-emerald-500/20 overflow-hidden mb-4 shadow-lg">
-                <div class="p-4 bg-emerald-900/20 cursor-pointer flex items-center justify-between hover:bg-emerald-900/40 transition-colors" onclick="toggleAccordion(this)">
-                    <div class="flex-1">
-                        <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-widest"><i class="fa-solid fa-users-gear"></i> ${jobName}</h3>
-                        <div class="w-full bg-black/50 h-2 rounded-full mt-3 overflow-hidden border border-white/5">
-                            <div class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all" style="width: ${progressPct}%"></div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 ml-6">
-                        <div class="text-right">
-                            <span class="text-sm font-black text-emerald-400 block">${progressPct}%</span>
-                            <span class="text-[10px] text-slate-400 font-mono">${doneInJob}/${tasksInJob.length} Task</span>
-                        </div>
-                        <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300 transform rotate-180"></i>
-                    </div>
-                </div>
-                <div class="transition-all duration-300 ease-in-out bg-black/10">
-                    <div class="p-3 space-y-1 border-t border-white/5">
-                        ${tasksInJob.map(t => `
-                            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group">
-                                <div class="w-1/2 pr-2">
-                                    <p class="text-xs font-semibold ${t.status === 'done' ? 'line-through text-slate-500' : 'text-slate-200'} truncate" title="${t.taskName}">${t.taskName} ${!targetDate && t.date ? `<span class="text-[9px] text-indigo-400 ml-1">(${t.date})</span>` : ''}</p>
-                                </div>
-                                <div class="w-1/4 px-2">
-                                    <span class="text-[10px] text-slate-400 bg-black/40 px-2 py-1 rounded truncate block text-center border border-white/5" title="${t.ownerName}">${t.ownerName}</span>
-                                </div>
-                                <div class="w-1/4 pl-2 flex justify-end">
-                                    <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/60 border border-white/10 text-xs rounded py-1 pl-3 pr-6 outline-none cursor-pointer ${t.status === 'done' ? 'text-emerald-400 font-bold border-emerald-500/50' : (t.status === 'pending' ? 'text-amber-400 font-bold border-amber-500/50' : 'text-slate-400')}">
-                                        <option value="not run" ${t.status === 'not run' ? 'selected' : ''}>N (Not run)</option>
-                                        <option value="pending" ${t.status === 'pending' ? 'selected' : ''}>P (Pending)</option>
-                                        <option value="done" ${t.status === 'done' ? 'selected' : ''}>S (Success)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
+el('logoUpload').onchange = (e) => {
+    const f = e.target.files[0];
+    if (f) {
+        const r = new FileReader();
+        r.onload = (ev) => { el('companyLogoImg').src = ev.target.result; localStorage.setItem('ExecDash_Logo_Final', ev.target.result); };
+        r.readAsDataURL(f);
     }
-
-    const renderTableRows = (tasks, emptyMsg) => tasks.length ? tasks.map(t => {
-        let textClass = 'text-slate-400', borderClass = 'border-white/10';
-        if(t.status === 'done') { textClass = 'text-emerald-400 font-bold'; borderClass = 'border-emerald-500/50'; }
-        else if(t.status === 'pending') { textClass = 'text-amber-400 font-bold'; borderClass = 'border-amber-500/50'; }
-
-        return `
-        <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
-            <td class="px-4 py-3"><div class="text-xs font-semibold ${t.status === 'done' ? 'text-slate-500 line-through' : 'text-slate-200'} truncate w-40" title="${t.taskName}">${t.taskName}</div></td>
-            <td class="px-4 py-3 text-[10px] text-purple-300 font-medium truncate w-24" title="${t.ownerName}">${t.ownerName}</td>
-            <td class="px-4 py-3 text-[10px] text-slate-400 uppercase truncate w-20 text-center">${t.jobType}</td>
-            <td class="px-4 py-3 text-[10px] text-slate-400 font-mono text-center">${t.date || '-'}</td>
-            <td class="px-4 py-3 text-center">
-                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/40 border ${borderClass} text-[10px] rounded py-1 pl-2 pr-5 outline-none cursor-pointer ${textClass}">
-                    <option value="not run" ${t.status === 'not run' ? 'selected' : ''}>N</option>
-                    <option value="pending" ${t.status === 'pending' ? 'selected' : ''}>P</option>
-                    <option value="done" ${t.status === 'done' ? 'selected' : ''}>S</option>
-                </select>
-            </td>
-        </tr>
-    `}).join('') : `<tr><td colspan="5" class="py-10 text-center text-slate-500 opacity-60"><p class="text-xs font-bold uppercase">${emptyMsg}</p></td></tr>`;
-
-    el('adhocTableBody').innerHTML = renderTableRows(finalFiltered.filter(t => t.category === 'Adhoc'), 'ไม่มีงาน Adhoc (ลองกดปุ่มดูทั้งหมด)');
-    el('compliantTableBody').innerHTML = renderTableRows(finalFiltered.filter(t => t.category === 'Compliant'), 'ไม่มีเคสร้องเรียน (ลองกดปุ่มดูทั้งหมด)');
-}
+};
 
 init();
 </script>
 </body>
 </html>
-
-
 
