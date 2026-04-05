@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- เพิ่ม meta ป้องกันการจำ Cache ของเบราว์เซอร์ (แก้ปัญหา iPad ไม่อัปเดต) -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -59,7 +58,7 @@
         <h1 class="text-2xl md:text-3xl font-black text-white tracking-wide flex items-center gap-3">
             Executive Monitor <span class="text-[10px] bg-emerald-600 px-2 py-1 rounded-full uppercase tracking-widest text-white align-middle animate-pulse"><i class="fa-solid fa-wifi mr-1"></i> Real-time Active</span>
         </h1>
-        <p class="text-purple-300/80 text-xs mt-1">อัปเดตข้อมูลอัตโนมัติ</p>
+        <p class="text-purple-300/80 text-xs mt-1">อัปเดตข้อมูลอัตโนมัติซิงค์ตรงกับคลาวด์ตลอดเวลา</p>
     </div>
   </div>
   
@@ -68,10 +67,17 @@
       <label class="text-xs text-purple-300 font-bold uppercase tracking-widest"><i class="fa-solid fa-clock-rotate-left mr-1"></i> ดูงานวันที่:</label>
       <input id="dateFilter" type="date" class="bg-transparent border-none text-white text-sm focus:ring-0 cursor-pointer font-bold outline-none" />
     </div>
+    
     <label class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-900/40 transition-all active:scale-95 border border-indigo-400/30">
       <i class="fa-solid fa-cloud-arrow-up"></i> นำเข้าไฟล์ (Excel/CSV)
       <input id="fileUpload" type="file" accept=".xlsx,.xls,.csv" class="hidden" multiple />
     </label>
+
+    <!-- ปุ่มใหม่: บังคับซิงค์ข้อมูลขึ้นคลาวด์ด้วยตัวเอง -->
+    <button onclick="forceSync()" class="bg-sky-500/20 text-sky-400 hover:bg-sky-500 hover:text-white border border-sky-500/50 px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+      <i class="fa-solid fa-arrows-rotate"></i> บังคับซิงค์ (Force Sync)
+    </button>
+
     <button onclick="hardReset()" class="bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30 hover:border-rose-500 px-4 py-2.5 rounded-xl text-xs font-bold transition-all">
       <i class="fa-solid fa-trash-can"></i> ล้างข้อมูล
     </button>
@@ -137,7 +143,6 @@
 </section>
 
 <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-  
   <!-- Routine Tasks (Group A, B) -->
   <div class="xl:col-span-5 glass-card overflow-hidden flex flex-col h-[750px]">
     <div class="p-4 bg-black/20 border-b border-white/5 flex justify-between items-center">
@@ -151,15 +156,11 @@
         <div class="w-1/4">พนักงาน</div>
         <div class="w-1/4 pr-2">สถานะ</div>
     </div>
-    <div id="routineContainer" class="p-4 space-y-4 overflow-y-auto flex-1">
-        <!-- Injected via JS -->
-    </div>
+    <div id="routineContainer" class="p-4 space-y-4 overflow-y-auto flex-1"></div>
   </div>
 
   <!-- Right Column (Adhoc & Compliant) -->
   <div class="xl:col-span-7 flex flex-col gap-6 h-[750px]">
-      
-      <!-- Adhoc Table -->
       <div class="glass-card overflow-hidden flex flex-col flex-1 border-sky-500/30">
         <div class="p-4 bg-black/20 border-b border-sky-500/20 flex justify-between items-center">
             <h2 class="font-bold text-sky-400 flex items-center gap-2">
@@ -182,7 +183,6 @@
         </div>
       </div>
 
-      <!-- Compliant Table -->
       <div class="glass-card overflow-hidden flex flex-col flex-1 border-rose-500/30">
         <div class="p-4 bg-black/20 border-b border-rose-500/20 flex justify-between items-center">
             <h2 class="font-bold text-rose-400 flex items-center gap-2">
@@ -204,17 +204,14 @@
             </table>
         </div>
       </div>
-
   </div>
 </div>
 
 <!-- สคริปต์รวบยอดทั้งหมด -->
 <script type="module">
-// --- 1. การเชื่อมต่อ Firebase ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// ใส่ข้อมูล Config ของคุณแบบเป๊ะๆ
 const firebaseConfig = {
   apiKey: "AIzaSyBCe24a2jf09xA0B9P9Z7tEL6m2WhhNP3g",
   authDomain: "dashboard-project-1e251.firebaseapp.com",
@@ -228,7 +225,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- 2. ตัวแปรของระบบ ---
 const DB_KEY = 'Executive_Dash_V18_Ultimate'; 
 const appState = { tasks: [], selectedDate: '', filters: { employee: 'all', jobType: 'all' }, staffMap: {} };
 
@@ -240,7 +236,6 @@ Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 const el = id => document.getElementById(id);
 let isInitialLoad = true; 
 
-// --- 3. ฟังก์ชันเริ่มต้นระบบ ---
 function init() {
     const todayStr = new Date().toISOString().slice(0, 10);
     appState.selectedDate = todayStr;
@@ -251,7 +246,6 @@ function init() {
     const savedName = localStorage.getItem('ExecDash_CompanyName_Client');
     if(savedName) el('companyNameText').innerText = savedName;
 
-    // โหลดข้อมูลจากคลาวด์แบบ Real-time ทันทีที่เปิดเว็บ
     onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
         if (docSnap.exists()) {
             const remoteData = docSnap.data();
@@ -262,7 +256,7 @@ function init() {
             renderUI();
             
             if (!isInitialLoad) {
-                showAlert('ข้อมูลถูกอัปเดตจากอุปกรณ์อื่นแบบ Real-time แล้ว', 'sky', 'fa-cloud-arrow-down');
+                showAlert('ข้อมูลซิงค์ตรงกับคลาวด์แล้ว 🟢', 'emerald', 'fa-cloud-arrow-down');
             }
             isInitialLoad = false;
         } else {
@@ -275,31 +269,41 @@ function init() {
     });
 }
 
-// --- 4. ฟังก์ชันส่งข้อมูลขึ้นคลาวด์ (สำคัญมาก) ---
+// 🔴 อัปเกรดฟังก์ชันบันทึกข้อมูล (แก้บัค Undefined) 🔴
 function saveTasksToCloud(showProgress = true) {
     if (showProgress) showAlert('กำลังบันทึกข้อมูลขึ้นระบบ Cloud...', 'amber', 'fa-spinner fa-spin');
 
-    const dataToSync = {
+    // 1. บันทึกลงเครื่อง (สำรองไว้)
+    localStorage.setItem(DB_KEY, JSON.stringify({ tasks: appState.tasks, staffMap: appState.staffMap }));
+
+    // 2. ล้างข้อมูล (Clean Data) ลบค่าที่ว่างเปล่าทิ้งไป ป้องกัน Firebase Error
+    const rawData = {
         tasks: appState.tasks,
         staffMap: appState.staffMap,
         lastUpdated: new Date().getTime()
     };
+    const cleanDataToSync = JSON.parse(JSON.stringify(rawData)); // Trick ล้างค่า undefined ให้สะอาดเอี่ยม
 
-    setDoc(doc(db, "dashboard", "mainData"), dataToSync)
+    // 3. ส่งขึ้นคลาวด์
+    setDoc(doc(db, "dashboard", "mainData"), cleanDataToSync)
         .then(() => {
-            if (showProgress) showAlert('บันทึกข้อมูลสำเร็จ! ทุกหน้าจออัปเดตตรงกันแล้ว', 'emerald', 'fa-cloud-arrow-up');
+            if (showProgress) showAlert('บันทึกข้อมูลขึ้น Cloud สำเร็จ! ทุกหน้าจออัปเดตตรงกันแล้ว', 'emerald', 'fa-cloud-arrow-up');
         })
         .catch(err => {
             console.error("Firebase Save Error:", err);
-            let errorMsg = 'เกิดข้อผิดพลาดในการบันทึก: ' + err.message;
-            if(err.message.includes("exceeds the maximum")) {
-                errorMsg = "ไฟล์ใหญ่เกินไป (เกิน 1MB) กรุณาแยกไฟล์อัปโหลด";
-            }
-            showAlert(errorMsg, 'rose', 'fa-triangle-exclamation');
+            showAlert('เกิดข้อผิดพลาดในการบันทึกขึ้น Cloud: ' + err.message, 'rose', 'fa-triangle-exclamation');
         });
 }
 
-// ผูกเข้ากับระบบ HTML
+// ฟังก์ชันสำหรับปุ่ม Force Sync
+window.forceSync = function() {
+    if(appState.tasks.length === 0) {
+        showAlert('ไม่มีข้อมูลให้ซิงค์ กรุณานำเข้าไฟล์ก่อน', 'amber', 'fa-circle-info');
+        return;
+    }
+    saveTasksToCloud(true);
+};
+
 window.hardReset = function() { 
     if(confirm('คำเตือน: นี่คือการล้างข้อมูลของ "ทุกคน" บนระบบคลาวด์ ยืนยันหรือไม่?')) { 
         setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {}, lastUpdated: new Date().getTime() });
@@ -311,7 +315,7 @@ window.changeTaskStatus = function(taskId, newStatus) {
     const task = appState.tasks.find(t => t.id === taskId);
     if (task) { 
         task.status = newStatus; 
-        saveTasksToCloud(false); // ซ่อน Alert ตอนเปลี่ยนสถานะจะได้ไม่รำคาญตา
+        saveTasksToCloud(false);
         renderUI(); 
     }
 };
@@ -480,9 +484,7 @@ el('fileUpload').addEventListener('change', async (e) => {
     const files = e.target.files;
     if (!files.length) return;
     
-    showAlert('กำลังอ่านไฟล์และวิเคราะห์ข้อมูล...', 'sky', 'fa-spinner fa-spin');
     let newlyParsedTasks = [];
-    
     for(let i=0; i<files.length; i++) {
         const file = files[i];
         const data = await file.arrayBuffer();
@@ -497,7 +499,6 @@ el('fileUpload').addEventListener('change', async (e) => {
     }
     
     appState.tasks = [...appState.tasks, ...newlyParsedTasks];
-    
     const uniqueTasks = [];
     const map = new Map();
     for (const item of appState.tasks) {
@@ -512,7 +513,7 @@ el('fileUpload').addEventListener('change', async (e) => {
     updateDropdowns();
     renderUI();
     
-    // อัปโหลดไฟล์เสร็จ สั่งบันทึกขึ้น Cloud เลย
+    // อัปโหลดไฟล์เสร็จ สั่งบันทึกขึ้น Cloud ทันที
     saveTasksToCloud(true); 
     e.target.value = ''; 
 });
