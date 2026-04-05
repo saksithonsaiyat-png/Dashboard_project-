@@ -56,7 +56,10 @@
             YOUR COMPANY NAME
         </h2>
         <h1 class="text-2xl md:text-3xl font-black text-white tracking-wide flex items-center gap-3">
-            Executive Monitor <span class="text-[10px] bg-emerald-600 px-2 py-1 rounded-full uppercase tracking-widest text-white align-middle animate-pulse"><i class="fa-solid fa-wifi mr-1"></i> Real-time Active</span>
+            Executive Monitor 
+            <span id="connectionBadge" class="text-[10px] bg-amber-600 px-2 py-1 rounded-full uppercase tracking-widest text-white align-middle animate-pulse">
+                <i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting...
+            </span>
         </h1>
         <p class="text-purple-300/80 text-xs mt-1">อัปเดตข้อมูลอัตโนมัติซิงค์ตรงกับคลาวด์ตลอดเวลา</p>
     </div>
@@ -86,7 +89,7 @@
   </div>
 </header>
 
-<div id="statusAlert" class="hidden mb-6 p-4 rounded-xl text-sm font-medium flex items-center gap-3 shadow-lg z-50 fixed top-5 left-1/2 transform -translate-x-1/2 w-11/12 max-w-lg"></div>
+<div id="statusAlert" class="hidden mb-6 p-4 rounded-xl text-sm font-medium flex items-center justify-center gap-3 shadow-2xl z-50 fixed top-5 left-1/2 transform -translate-x-1/2 w-11/12 max-w-lg backdrop-blur-md transition-all duration-300"></div>
 
 <!-- Dropdown Filters -->
 <section class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -213,19 +216,25 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// โค้ด Firebase ของคุณ (ถูกต้องแล้ว)
+// 🔴🔴🔴 1. โค้ด Firebase Config ใหม่ของคุณ 🔴🔴🔴
 const firebaseConfig = {
-  apiKey: "AIzaSyBCe24a2jf09xA0B9P9Z7tEL6m2WhhNP3g",
-  authDomain: "dashboard-project-1e251.firebaseapp.com",
-  projectId: "dashboard-project-1e251",
-  storageBucket: "dashboard-project-1e251.firebasestorage.app",
-  messagingSenderId: "667197621003",
-  appId: "1:667197621003:web:7406b7b80913574fe9180e",
-  measurementId: "G-Q3RK3JHE6L"
+  apiKey: "AIzaSyB12236YZUpI4-I-q8dlK4cEr6AF2YJCko",
+  authDomain: "dashboard-38b45.firebaseapp.com",
+  projectId: "dashboard-38b45",
+  storageBucket: "dashboard-38b45.firebasestorage.app",
+  messagingSenderId: "163619936500",
+  appId: "1:163619936500:web:d7392f55f433e2d1d326a1"
 };
+// 🔴🔴🔴 สิ้นสุดส่วนที่ต้องแก้ไข 🔴🔴🔴
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+let app, db;
+try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+} catch (error) {
+    console.error("Firebase Initialization Error:", error);
+    alert("ไม่สามารถเชื่อมต่อ Firebase ได้ กรุณาตรวจสอบ Config ใหม่");
+}
 
 const DB_KEY = 'Executive_Dash_V18_Ultimate'; 
 const appState = { tasks: [], selectedDate: '', filters: { employee: 'all', jobType: 'all' }, staffMap: {} };
@@ -248,35 +257,58 @@ function init() {
     const savedName = localStorage.getItem('ExecDash_CompanyName_Client');
     if(savedName) el('companyNameText').innerText = savedName;
 
-    // ระบบดึงข้อมูลจาก Cloud แบบมีตัวเลขนับจำนวน
-    onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
-        if (docSnap.exists()) {
-            const remoteData = docSnap.data();
-            appState.tasks = remoteData.tasks || [];
-            appState.staffMap = remoteData.staffMap || {};
-            
-            updateDropdowns();
-            renderUI();
-            
-            if (!isInitialLoad) {
-                // อัปเกรด: บอกจำนวนงานให้รู้เลยว่าดึงมาสำเร็จ
-                showAlert(`ซิงค์สำเร็จ! โหลดงานจาก Cloud มาแล้ว ${appState.tasks.length} รายการ`, 'emerald', 'fa-cloud-arrow-down');
+    if (!db) return;
+
+    // ระบบดึงข้อมูลจาก Cloud
+    try {
+        onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
+            const badge = el('connectionBadge');
+            badge.className = "text-[10px] bg-emerald-600 px-2 py-1 rounded-full uppercase tracking-widest text-white align-middle";
+            badge.innerHTML = `<i class="fa-solid fa-wifi mr-1"></i> Real-time Active`;
+
+            if (docSnap.exists()) {
+                const remoteData = docSnap.data();
+                appState.tasks = remoteData.tasks || [];
+                appState.staffMap = remoteData.staffMap || {};
+                
+                updateDropdowns();
+                renderUI();
+                
+                if (!isInitialLoad) {
+                    showAlert(`ซิงค์สำเร็จ! อัปเดตข้อมูลจากระบบส่วนกลางแล้ว`, 'emerald', 'fa-cloud-arrow-down');
+                }
+                isInitialLoad = false;
+            } else {
+                console.log("ยังไม่มีข้อมูลบน Cloud");
+                isInitialLoad = false;
+                renderUI(); // แสดงหน้าว่างเปล่าไปก่อน
             }
-            isInitialLoad = false;
-        } else {
-            console.log("ยังไม่มีข้อมูลบน Cloud");
-            isInitialLoad = false;
-        }
-    }, (error) => {
-        console.error("Firebase Sync Error: ", error);
-        showAlert('เชื่อมต่อฐานข้อมูลล้มเหลว: ' + error.message, 'rose', 'fa-wifi');
-    });
+        }, (error) => {
+            console.error("Firebase Sync Error: ", error);
+            const badge = el('connectionBadge');
+            badge.className = "text-[10px] bg-rose-600 px-2 py-1 rounded-full uppercase tracking-widest text-white align-middle";
+            badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Offline`;
+            
+            // ตรวจสอบ Error กรณีที่เจอบ่อยที่สุด (ลืมเปิด Test Mode)
+            if(error.message.includes("Missing or insufficient permissions")) {
+                showAlert('กรุณาไปที่ Firebase -> Firestore Database -> Rules แล้วแก้ "allow read, write: if false;" เป็น "if true;"', 'rose', 'fa-lock');
+            } else {
+                showAlert('เชื่อมต่อฐานข้อมูลขัดข้อง (ใช้งานแบบ Offline)', 'rose', 'fa-wifi');
+            }
+        });
+    } catch (e) {
+        console.error("Firestore error:", e);
+    }
 }
 
 function saveTasksToCloud(showProgress = true) {
+    if (!db) return;
     if (showProgress) showAlert('กำลังบันทึกข้อมูลขึ้นระบบ Cloud...', 'amber', 'fa-spinner fa-spin');
+    
+    // สำรองไว้ในเครื่องด้วย
     localStorage.setItem(DB_KEY, JSON.stringify({ tasks: appState.tasks, staffMap: appState.staffMap }));
 
+    // ทำความสะอาดข้อมูลก่อนส่งขึ้น Firebase เพื่อป้องกัน Error
     const rawData = { tasks: appState.tasks, staffMap: appState.staffMap, lastUpdated: new Date().getTime() };
     const cleanDataToSync = JSON.parse(JSON.stringify(rawData)); 
 
@@ -290,17 +322,17 @@ function saveTasksToCloud(showProgress = true) {
         });
 }
 
-// 🔴 เพิ่มฟังก์ชันสำหรับปุ่ม "ดูงานทั้งหมด" 🔴
+// ผูกฟังก์ชันเข้ากับ Window เพื่อให้ HTML เรียกใช้ได้
 window.clearDateFilter = function() {
-    el('dateFilter').value = ''; // ล้างช่องวันที่
-    appState.selectedDate = '';  // เซ็ตให้เป็นค่าว่าง
+    el('dateFilter').value = ''; 
+    appState.selectedDate = '';  
     renderUI();
     showAlert('กำลังแสดงงานของ "ทุกวัน" ที่มีอยู่ในระบบ', 'indigo', 'fa-calendar-check');
 };
 
 window.forceSync = function() {
     if(appState.tasks.length === 0) {
-        showAlert('ไม่มีข้อมูลให้ซิงค์', 'amber', 'fa-circle-info');
+        showAlert('ไม่มีข้อมูลให้ซิงค์ (ต้องอัปโหลดไฟล์ Excel ก่อน)', 'amber', 'fa-circle-info');
         return;
     }
     saveTasksToCloud(true);
@@ -308,7 +340,7 @@ window.forceSync = function() {
 
 window.hardReset = function() { 
     if(confirm('คำเตือน: นี่คือการล้างข้อมูลขยะทั้งหมดบนระบบคลาวด์ ยืนยันหรือไม่?')) { 
-        setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {}, lastUpdated: new Date().getTime() });
+        if(db) setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {}, lastUpdated: new Date().getTime() });
         location.reload(); 
     } 
 };
@@ -317,7 +349,7 @@ window.changeTaskStatus = function(taskId, newStatus) {
     const task = appState.tasks.find(t => t.id === taskId);
     if (task) { 
         task.status = newStatus; 
-        saveTasksToCloud(false);
+        saveTasksToCloud(false); // เซฟขึ้นคลาวด์เงียบๆ แบบไม่ต้องมีหน้าต่างเด้งกวนใจ
         renderUI(); 
     }
 };
@@ -349,7 +381,7 @@ function showAlert(msg, color, icon='fa-info-circle') {
     alert.className = `mb-6 p-4 rounded-xl text-sm font-bold flex items-center justify-center gap-3 bg-${color}-500/90 text-white border border-${color}-400/50 shadow-2xl z-50 fixed top-5 left-1/2 transform -translate-x-1/2 w-11/12 max-w-lg backdrop-blur-md transition-all duration-300`;
     alert.innerHTML = `<i class="fa-solid ${icon} text-xl"></i> <span>${msg}</span>`;
     alert.classList.remove('hidden');
-    setTimeout(() => { alert.classList.add('hidden'); }, 5000);
+    setTimeout(() => { alert.classList.add('hidden'); }, 4000);
 }
 
 function parseDateKey(k) {
@@ -424,7 +456,6 @@ function processFileContent(workbook, fileName) {
                 
                 if (!taskKey) return;
                 const taskName = String(row[taskKey]).trim();
-                // 🔴 อัปเกรด: กรองขยะทิ้ง ถ้าง่ายไม่มีชื่อ ไม่เอาเข้าคลาวด์
                 if (!taskName || taskName === 'ไม่ระบุ') return;
 
                 const rawOwner = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
@@ -520,7 +551,7 @@ el('fileUpload').addEventListener('change', async (e) => {
 });
 
 el('dateFilter').addEventListener('change', (e) => { 
-    appState.selectedDate = e.target.value; // ยอมให้เป็นค่าว่างได้
+    appState.selectedDate = e.target.value; 
     renderUI(); 
 });
 el('employeeSelect').addEventListener('change', (e) => { appState.filters.employee = e.target.value; renderUI(); });
@@ -582,7 +613,6 @@ function renderUI() {
     const { employee, jobType } = appState.filters;
     const targetDate = appState.selectedDate; 
 
-    // 🔴 อัปเกรด: ถ้าไม่มีวันที่ (กดปุ่มดูทั้งหมด) ให้แสดงงานทั้งหมดทันที 🔴
     let dateFilteredTasks = appState.tasks.filter(t => {
         if (!targetDate) return true; 
         
@@ -617,7 +647,6 @@ function renderUI() {
     const doneRoutine = finalFiltered.filter(t => t.category === 'Routine' && t.status === 'done').length;
     el('percentStat').innerText = totalRoutine ? `${Math.round((doneRoutine/totalRoutine)*100)}%` : '0%';
 
-    // เปลี่ยน Label ให้รู้ว่าดูของวันไหนอยู่
     el('routineDateLabel').innerText = targetDate ? `วันที่: ${targetDate}` : 'แสดงงานทุกวันที่มีในระบบ';
 
     const routineTasks = finalFiltered.filter(t => t.category === 'Routine');
@@ -705,5 +734,6 @@ init();
 </script>
 </body>
 </html>
+
 
 
