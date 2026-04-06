@@ -56,7 +56,6 @@
 <!-- Header -->
 <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5 mb-8 border-b border-white/10 pb-6">
   <div class="flex items-center gap-5">
-    <!-- กล่อง Logo พร้อมระบบอัปโหลด -->
     <label class="w-16 h-16 rounded-2xl bg-purple-500/20 shadow-lg flex items-center justify-center overflow-hidden border border-purple-400/30 shrink-0 cursor-pointer hover:scale-105 transition-transform group relative">
         <img id="companyLogoImg" src="https://placehold.co/150x150/2c2541/b490ff?text=LOGO" alt="Logo" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-purple-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -78,7 +77,6 @@
   </div>
   
   <div class="flex flex-wrap items-center gap-3">
-    <!-- Date Filter -->
     <div class="glass-card px-4 py-2 flex items-center gap-2 border-[#b490ff]/30 bg-[#b490ff]/10">
       <label class="text-xs text-[#b490ff] font-bold uppercase tracking-widest">Date:</label>
       <input id="dateFilter" type="date" class="bg-transparent border-none text-white text-sm focus:ring-0 cursor-pointer font-bold outline-none" />
@@ -233,7 +231,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// 🔴 FIREBASE CONFIGURATION (ใช้งานได้ 100%) 🔴
+// 🔴 FIREBASE CONFIGURATION 🔴
 const firebaseConfig = {
   apiKey: "AIzaSyB12236YZUpI4-I-q8dlK4cEr6AF2YJCko",
   authDomain: "dashboard-38b45.firebaseapp.com",
@@ -251,7 +249,7 @@ const appState = {
     selectedDate: '', 
     filters: { employee: 'all', jobType: 'all' },
     companyName: 'COMPANY NAME',
-    companyLogo: null // เพิ่มตัวแปรเก็บโลโก้
+    companyLogo: null
 };
 
 let chartCompany = null;
@@ -268,7 +266,6 @@ function init() {
     appState.selectedDate = todayStr;
     el('dateFilter').value = todayStr;
 
-    // ดึงข้อมูลหลักจาก Firebase
     onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
         const badge = el('connectionBadge');
         badge.innerHTML = `<i class="fa-solid fa-wifi mr-1 text-emerald-400"></i> Connected`;
@@ -278,13 +275,11 @@ function init() {
             const remoteData = docSnap.data();
             appState.tasks = remoteData.tasks || [];
             
-            // อัปเดตชื่อบริษัท
             if (remoteData.companyName && document.activeElement !== el('companyNameText')) {
                 appState.companyName = remoteData.companyName;
                 el('companyNameText').innerText = appState.companyName;
             }
 
-            // อัปเดตโลโก้บริษัท (Real-time Sync)
             if (remoteData.companyLogo && remoteData.companyLogo !== appState.companyLogo) {
                 appState.companyLogo = remoteData.companyLogo;
                 el('companyLogoImg').src = appState.companyLogo;
@@ -306,29 +301,22 @@ function init() {
         showAlert('Connection Failed.', 'rose', 'fa-triangle-exclamation');
     });
 
-    // พิมพ์ชื่อบริษัทแล้วอัปเดตขึ้นคลาวด์
     el('companyNameText').addEventListener('input', (e) => {
         appState.companyName = e.target.innerText;
         clearTimeout(companyNameTimeout);
-        companyNameTimeout = setTimeout(() => {
-            saveToCloud(false);
-        }, 1000); 
+        companyNameTimeout = setTimeout(() => saveToCloud(false), 1000); 
     });
 }
 
 function saveToCloud(showNotif = true) {
     if (showNotif) showAlert('Syncing with Cloud...', 'amber', 'fa-spinner fa-spin');
     
-    // บันทึกข้อมูลทั้งหมด รวมถึงโลโก้ ขึ้น Firebase
     const payload = { 
         tasks: appState.tasks, 
         companyName: appState.companyName,
         lastUpdated: Date.now() 
     };
-    
-    if (appState.companyLogo) {
-        payload.companyLogo = appState.companyLogo;
-    }
+    if (appState.companyLogo) payload.companyLogo = appState.companyLogo;
 
     const cleanData = JSON.parse(JSON.stringify(payload));
 
@@ -342,7 +330,8 @@ window.forceSync = () => saveToCloud(true);
 window.hardReset = () => { if(confirm('ล้างข้อมูลทั้งหมดในระบบคลาวด์?')) { setDoc(doc(db, "dashboard", "mainData"), { tasks: [], companyName: 'COMPANY NAME', companyLogo: null }); location.reload(); } };
 window.changeTaskStatus = (id, status) => { const t = appState.tasks.find(x => x.id === id); if(t) { t.status = status; saveToCloud(false); renderUI(); } };
 
-// ฟังก์ชันแยกแยะวันที่ (ลอจิกทนทาน)
+function cleanKey(s) { return String(s).replace(/\s/g, '').toLowerCase(); }
+
 function parseDateKey(k) {
     if (!k) return null;
     let s = String(k).trim();
@@ -354,99 +343,107 @@ function parseDateKey(k) {
     return null;
 }
 
-// 📌 ฟังก์ชันดึงค่าจากคอลัมน์แบบทนทาน (รับมือคำผิด / เว้นวรรค)
-function getColumnValue(row, possibleKeys) {
+// 📌 ฟังก์ชันอ่านข้อมูลแบบยืดหยุ่น (แก้ปัญหาการหาคอลัมน์ไม่เจอ)
+function findColumnKey(row, possibleKeys) {
     const keys = Object.keys(row);
     for (let k of keys) {
-        const cleanK = k.trim().toLowerCase().replace(/\s/g, '');
+        const cleanK = cleanKey(k);
         if (possibleKeys.some(pk => cleanK.includes(pk))) {
-            return String(row[k]).trim();
+            return k; // คืนค่า Key จริงที่อยู่ในข้อมูล (เพื่อดึงข้อมูล)
         }
     }
     return null;
 }
 
-// 📌 ระบบประมวลผลไฟล์ (The Ultimate Parser)
+// 📌 Smart Parser: ไม่สนใจชื่อไฟล์ เน้นดูเนื้อหา
 function processWorkbook(wb, fileName) {
     let parsed = [];
-    let fLower = String(fileName).toLowerCase().replace(/\s/g, '');
 
     wb.SheetNames.forEach(sheetName => {
-        const rawData = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
-        if (!rawData.length) return;
+        // อ่านข้อมูลแบบ 2 มิติ (หา Master Data)
+        const rawMatrix = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
+        let isMaster = false;
 
-        const sLower = sheetName.toLowerCase().replace(/\s/g, '');
-        const combinedName = sLower + fLower; // ชื่อชีตผสมชื่อไฟล์
-        const sampleHeaders = Object.keys(rawData[0]).map(h => h.trim().toLowerCase());
-
-        // 1. ตรวจจับ MASTER DATA
-        if (combinedName.includes('master')) {
-            const rawArray = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
-            rawArray.forEach(row => {
-                row.forEach((cell, cIdx) => {
-                    if (String(cell).trim().toLowerCase() === 'company name') {
-                        const nameFound = String(row[cIdx + 1] || '').trim();
-                        if (nameFound) {
-                            appState.companyName = nameFound;
-                            el('companyNameText').innerText = nameFound;
-                        }
+        rawMatrix.forEach(row => {
+            row.forEach((cell, idx) => {
+                if (String(cell).trim().toLowerCase() === 'company name') {
+                    isMaster = true;
+                    const nameFound = String(row[idx + 1] || '').trim();
+                    if (nameFound) {
+                        appState.companyName = nameFound;
+                        el('companyNameText').innerText = nameFound;
                     }
-                });
+                }
             });
-            return;
-        }
+        });
 
-        // 2. วิเคราะห์ประเภทงาน: เช็คว่าหัวข้อเป็นแนวนอน(Routine) หรือแนวตั้ง(Adhoc/Compliant)
-        // ถ้าเจอหัวคอลัมน์เป็นรูปแบบวันที่หลายๆ อัน แสดงว่าเป็นตาราง Routine
-        const isRoutine = combinedName.includes('group') || sampleHeaders.includes('task');
-        const isCompliant = combinedName.includes('compliant') || combinedName.includes('ร้องเรียน');
+        if (isMaster) return; // ถ้าเป็น Master Data จบการทำงานชีตนี้
 
-        rawData.forEach(row => {
-            // ดึงชื่องาน
-            const taskName = getColumnValue(row, ['task', 'jobname', 'ชื่องาน']);
+        // อ่านข้อมูลแบบออบเจกต์
+        const jsonRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+        if (!jsonRows.length) return;
+
+        // วิเคราะห์ว่าเป็นข้อมูลประเภทใดจากแถวแรก
+        const firstRow = jsonRows[0];
+        
+        const taskCol = findColumnKey(firstRow, ['task', 'jobname', 'ชื่องาน']);
+        const ownerCol = findColumnKey(firstRow, ['owner', 'onwer', 'พนักงาน']);
+        
+        if (!taskCol) return; // ถ้าไม่มีชื่องาน ถือว่าไม่ใช่ตารางที่ต้องการ
+
+        const dateCols = Object.keys(firstRow).filter(k => parseDateKey(k));
+        const deadlineCol = findColumnKey(firstRow, ['deadline', 'กำหนดส่ง', 'date']);
+        
+        // ถ้ามีคอลัมน์ที่เป็นวันที่(YYYY-MM-DD) เรียงกันหลายๆคอลัมน์ = Routine
+        const isRoutine = dateCols.length >= 2; 
+
+        jsonRows.forEach(row => {
+            const taskName = String(row[taskCol]).trim();
             if (!taskName || taskName === 'ไม่ระบุ') return;
 
-            // ดึงชื่อพนักงาน (รับมือคำว่า 'Onwer' หรือ 'Owner')
-            const ownerName = getColumnValue(row, ['owner', 'onwer', 'พนักงาน']) || 'ไม่ระบุ';
+            const ownerName = ownerCol ? String(row[ownerCol]).trim() : 'ไม่ระบุ';
 
             if (isRoutine) {
-                // *** ดึงข้อมูลแบบ MATRIX (แนวนอน) ***
-                let jobType = 'Routine Monitoring';
-                
-                Object.keys(row).forEach(header => {
-                    const dKey = parseDateKey(header);
-                    if (dKey) { // ถ้าหัวคอลัมน์เป็นวันที่
-                        const val = String(row[header]).trim().toUpperCase();
-                        if (val && ['S','P','N','SUCCESS','PENDING'].some(v => val.includes(v))) {
-                            let status = 'not run';
-                            if (val === 'S' || val.includes('SUCCESS')) status = 'done';
-                            else if (val === 'P' || val.includes('PENDING')) status = 'pending';
-                            
-                            parsed.push({
-                                id: `R-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
-                                category: 'Routine', 
-                                jobType: jobType, 
-                                taskName: taskName, 
-                                ownerName: ownerName, 
-                                date: dKey, 
-                                status: status
-                            });
-                        }
+                // *** ดึงข้อมูล Routine ***
+                dateCols.forEach(dCol => {
+                    const dKey = parseDateKey(dCol);
+                    const val = String(row[dCol]).trim().toUpperCase();
+
+                    if (val && ['S','P','N','SUCCESS','PENDING'].some(v => val.includes(v))) {
+                        let status = 'not run';
+                        if (val === 'S' || val.includes('SUCCESS')) status = 'done';
+                        else if (val === 'P' || val.includes('PENDING')) status = 'pending';
+                        
+                        parsed.push({
+                            id: `R-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
+                            category: 'Routine', 
+                            jobType: 'Routine Monitoring', 
+                            taskName: taskName, 
+                            ownerName: ownerName, 
+                            date: dKey, 
+                            status: status
+                        });
                     }
                 });
-            } else {
-                // *** ดึงข้อมูลแบบ LIST (แนวตั้ง) ***
-                const catVal = getColumnValue(row, ['category', 'หมวดหมู่']) || '';
-                const dateVal = getColumnValue(row, ['deadline', 'กำหนดส่ง']);
-                const statusVal = String(getColumnValue(row, ['status', 'สถานะ']) || '').toUpperCase();
 
+            } else {
+                // *** ดึงข้อมูล Adhoc / Compliant ***
+                const catCol = findColumnKey(firstRow, ['category', 'หมวดหมู่']);
+                const statusCol = findColumnKey(firstRow, ['status', 'สถานะ']);
+
+                const catVal = catCol ? String(row[catCol]).trim() : '';
+                const dateVal = deadlineCol ? String(row[deadlineCol]).trim() : '';
+                const statusVal = statusCol ? String(row[statusCol]).trim().toUpperCase() : '';
+
+                // วิเคราะห์ว่าเป็น Compliant หรือไม่ (ดูจากชื่อไฟล์ หรือ หมวดหมู่)
+                let isCompliant = fileName.toLowerCase().includes('compliant') || catVal.includes('ร้องเรียน');
                 let mainCategory = isCompliant ? 'Compliant' : 'Adhoc';
-                if (catVal.includes('ร้องเรียน')) mainCategory = 'Compliant';
 
                 let jobType = catVal || 'None';
                 if (mainCategory === 'Compliant' && jobType === 'None') jobType = 'Compliant Management';
 
                 const dKey = parseDateKey(dateVal) || '';
+                
                 let status = 'not run';
                 if (statusVal.includes('SUCCESS') || statusVal === 'S') status = 'done';
                 else if (statusVal.includes('PENDING') || statusVal === 'P' || statusVal.includes('OVERDUE')) status = 'pending';
@@ -475,8 +472,9 @@ el('fileUpload').onchange = async (e) => {
     for(let f of files) {
         const buf = await f.arrayBuffer();
         const wb = XLSX.read(buf, { type: 'array' });
-        if (wb.SheetNames.length === 1 && f.name.includes('.csv')) {
-            wb.SheetNames[0] = f.name.replace('.csv', '');
+        // บังคับให้ชื่อชีตของ CSV เป็นชื่อไฟล์ เพื่อการแยกแยะ (ถ้าจำเป็น)
+        if (wb.SheetNames.length === 1 && f.name.toLowerCase().endsWith('.csv')) {
+            wb.SheetNames[0] = f.name;
         }
         allNewTasks = [...allNewTasks, ...processWorkbook(wb, f.name)];
     }
@@ -485,7 +483,6 @@ el('fileUpload').onchange = async (e) => {
     allNewTasks.forEach(t => existingMap.set(`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t));
     appState.tasks = Array.from(existingMap.values());
 
-    // รีเซ็ตตัวกรองวันที่ตอนอัปโหลด เพื่อให้เห็นงานทั้งหมด
     appState.selectedDate = '';
     el('dateFilter').value = '';
 
@@ -495,34 +492,42 @@ el('fileUpload').onchange = async (e) => {
     e.target.value = '';
 };
 
-// 📌 ฟังก์ชันอัปโหลดโลโก้ (แปลงเป็น Base64 แล้วส่งขึ้น Firebase แบบ Real-time)
+// ย่อขนาดรูปภาพก่อนส่งขึ้น Firebase ป้องกันความจุเต็ม
 el('logoUpload').onchange = (e) => {
     const f = e.target.files[0];
     if (f) {
-        const r = new FileReader();
-        r.onload = (ev) => { 
-            const base64Img = ev.target.result;
-            el('companyLogoImg').src = base64Img; 
-            appState.companyLogo = base64Img;
-            saveToCloud(false); // สั่งเซฟขึ้น Firebase ทันที
+        const reader = new FileReader();
+        reader.onload = (ev) => { 
+            const img = new Image();
+            img.src = ev.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 150; canvas.height = 150;
+                ctx.drawImage(img, 0, 0, 150, 150);
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                
+                el('companyLogoImg').src = compressedBase64; 
+                appState.companyLogo = compressedBase64;
+                saveToCloud(false); 
+            }
         };
-        r.readAsDataURL(f);
+        reader.readAsDataURL(f);
     }
 };
 
 function updateDropdowns() {
     const emps = [...new Set(appState.tasks.map(t => t.ownerName))].sort();
-    el('employeeSelect').innerHTML = '<option value="all">ทุกคน (All)</option>' + emps.map(n => `<option value="${n}">${n}</option>`).join('');
+    el('employeeSelect').innerHTML = '<option value="all">Everyone (All)</option>' + emps.map(n => `<option value="${n}">${n}</option>`).join('');
     
     const types = [...new Set(appState.tasks.map(t => t.jobType))].sort();
-    el('jobTypeSelect').innerHTML = '<option value="all">ทุกหมวดหมู่ (All)</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+    el('jobTypeSelect').innerHTML = '<option value="all">All Categories</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
 }
 
 function renderUI() {
     const { employee, jobType } = appState.filters;
     const target = appState.selectedDate;
 
-    // 🔥 ระบบ Filter: ถ้าระบุวันที่ ให้กรองแค่งาน Routine, ส่วนงาน Adhoc โชว์เสมอ
     const filtered = appState.tasks.filter(t => {
         const matchEmp = employee === 'all' || t.ownerName === employee;
         const matchJob = jobType === 'all' || t.jobType === jobType;
@@ -540,7 +545,6 @@ function renderUI() {
     el('percentStat').innerText = accList.length ? `${Math.round((rDone/accList.length)*100)}%` : '0%';
     el('routineDateLabel').innerText = target ? `Date: ${target}` : 'Overview: All Dates';
 
-    // แบ่งตารางซ้าย(Routine+Adhoc) ขวา(Compliant)
     const routineAdhocList = filtered.filter(t => t.category === 'Routine' || t.category === 'Adhoc');
     const compList = filtered.filter(t => t.category === 'Compliant');
     
