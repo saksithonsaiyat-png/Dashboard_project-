@@ -15,17 +15,17 @@
     @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;600;700&display=swap');
     
     :root {
-      /* โทนสีม่วงเข้มพาสเทลตามรีเควส */
-      --bg-dark-purple: #2d243f;
-      --card-purple: rgba(62, 48, 84, 0.65);
+      /* โทนสีม่วงเข้มพาสเทล (Dark Pastel Purple) */
+      --bg-dark-purple: #2c2541;
+      --card-purple: rgba(65, 53, 89, 0.75);
       --accent-purple: #b490ff;
       --accent-hover: #9c73f8;
     }
 
     body {
       background-color: var(--bg-dark-purple);
-      background-image: radial-gradient(circle at top right, rgba(180, 144, 255, 0.1), transparent 400px),
-                        radial-gradient(circle at bottom left, rgba(100, 200, 255, 0.05), transparent 400px);
+      background-image: radial-gradient(circle at top right, rgba(180, 144, 255, 0.12), transparent 500px),
+                        radial-gradient(circle at bottom left, rgba(120, 210, 255, 0.08), transparent 500px);
       font-family: 'Anuphan', sans-serif;
       color: #e2e8f0;
       overflow-x: hidden;
@@ -33,70 +33,70 @@
     
     .glass-card {
       background: var(--card-purple);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(16px);
       border-radius: 1rem;
-      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
     }
     
     .status-select {
         appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: right 0.5rem center;
+        background-position: right 0.75rem center;
         background-size: 0.8em 0.8em;
     }
     
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-thumb { background: #68538c; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.15); }
   </style>
 </head>
-<body class="min-h-screen p-4 md:p-6 pb-20">
+<body class="min-h-screen p-4 md:p-6 pb-20 text-sm">
 
 <!-- Header -->
-<header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 border-b border-white/5 pb-4">
-  <div class="flex items-center gap-4">
-    <label class="w-14 h-14 rounded-xl bg-purple-500/10 shadow-lg flex items-center justify-center overflow-hidden border border-purple-400/20 shrink-0 cursor-pointer hover:scale-105 transition-all group relative">
-        <img id="companyLogoImg" src="https://placehold.co/150x150/2d243f/b490ff?text=LOGO" alt="Logo" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-purple-900/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <i class="fa-solid fa-camera text-white text-sm"></i>
+<header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5 mb-8 border-b border-white/10 pb-6">
+  <div class="flex items-center gap-5">
+    <label class="w-16 h-16 rounded-2xl bg-purple-500/20 shadow-lg flex items-center justify-center overflow-hidden border border-purple-400/30 shrink-0 cursor-pointer hover:scale-105 transition-transform group relative">
+        <img id="companyLogoImg" src="https://placehold.co/150x150/2c2541/b490ff?text=LOGO" alt="Logo" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-purple-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <i class="fa-solid fa-camera text-white"></i>
         </div>
         <input type="file" id="logoUpload" accept="image/*" class="hidden">
     </label>
     <div>
-        <h2 id="companyNameText" class="text-[10px] font-black text-[#b490ff] uppercase tracking-[0.2em] mb-0.5 outline-none border-b border-transparent hover:border-[#b490ff] transition-all cursor-text" contenteditable="true" title="ชื่อบริษัท (โหลดอัตโนมัติจาก Master Data)">
+        <h2 id="companyNameText" class="text-xs font-black text-[#b490ff] uppercase tracking-[0.2em] mb-1 outline-none border-b border-transparent hover:border-[#b490ff] transition-all cursor-text" contenteditable="true" title="ชื่อบริษัท (โหลดอัตโนมัติจาก Master Data)">
             COMPANY NAME
         </h2>
-        <h1 class="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-3">
+        <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
             Executive Dashboard
-            <span id="connectionBadge" class="text-[8px] bg-slate-800 px-2 py-1 rounded-full uppercase font-bold text-slate-400 align-middle">
+            <span id="connectionBadge" class="text-[10px] bg-slate-800 px-2.5 py-1 rounded-full uppercase font-bold text-slate-400 align-middle shadow-inner">
                 <i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing
             </span>
         </h1>
     </div>
   </div>
   
-  <div class="flex flex-wrap items-center gap-2">
-    <div class="glass-card px-3 py-1.5 flex items-center gap-2 border-[#b490ff]/20 bg-[#b490ff]/5">
-      <label class="text-[9px] text-[#b490ff] font-black uppercase tracking-widest">Date:</label>
-      <input id="dateFilter" type="date" class="bg-transparent border-none text-white text-xs focus:ring-0 cursor-pointer font-bold outline-none" />
-      <button onclick="clearDateFilter()" class="ml-1 text-[#b490ff] hover:text-white text-[9px] font-black uppercase bg-white/5 px-2 py-1 rounded transition-colors" title="ดูงานทุกวัน">
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="glass-card px-4 py-2 flex items-center gap-2 border-[#b490ff]/30 bg-[#b490ff]/10">
+      <label class="text-xs text-[#b490ff] font-bold uppercase tracking-widest">Date:</label>
+      <input id="dateFilter" type="date" class="bg-transparent border-none text-white text-sm focus:ring-0 cursor-pointer font-bold outline-none" />
+      <button onclick="clearDateFilter()" class="ml-2 text-[#b490ff] hover:text-white text-xs font-bold uppercase bg-white/10 px-2 py-1 rounded transition-colors" title="ดูงานทุกวัน">
         View All
       </button>
     </div>
     
-    <label class="bg-[#8b6cc7] hover:bg-[#b490ff] text-white px-4 py-2 rounded-lg text-[11px] font-black flex items-center gap-2 cursor-pointer shadow-lg shadow-[#b490ff]/20 transition-all active:scale-95">
+    <label class="bg-[#8b6cc7] hover:bg-[#b490ff] text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer shadow-lg shadow-[#b490ff]/20 transition-all active:scale-95">
       <i class="fa-solid fa-file-excel"></i> IMPORT FILE
       <input id="fileUpload" type="file" accept=".xlsx,.xls,.csv" class="hidden" multiple />
     </label>
 
-    <div class="flex items-center gap-1.5">
-        <button onclick="forceSync()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all text-[11px]" title="บังคับซิงค์คลาวด์">
+    <div class="flex items-center gap-2">
+        <button onclick="forceSync()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-sm" title="บังคับซิงค์คลาวด์">
             <i class="fa-solid fa-arrows-rotate"></i>
         </button>
-        <button onclick="hardReset()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white transition-all text-[11px]" title="ล้างข้อมูลทั้งหมด">
+        <button onclick="hardReset()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white transition-all text-sm" title="ล้างข้อมูลทั้งหมด">
             <i class="fa-solid fa-trash-can"></i>
         </button>
     </div>
@@ -104,69 +104,70 @@
 </header>
 
 <!-- Stats Grid -->
-<section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-  <div class="glass-card p-4 border-t-2 border-emerald-400 relative overflow-hidden group">
-    <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">Success (S)</p>
-    <div class="flex items-baseline gap-1.5 relative z-10">
-        <h3 id="successStat" class="text-2xl font-black text-white">0</h3>
-        <span class="text-[9px] text-emerald-400 font-bold">Tasks</span>
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+  <div class="glass-card p-5 border-l-4 border-emerald-400 relative overflow-hidden group">
+    <p class="text-[11px] text-slate-300 uppercase font-black tracking-widest mb-2">Success (S)</p>
+    <div class="flex items-baseline gap-2 relative z-10">
+        <h3 id="successStat" class="text-4xl font-black text-white">0</h3>
+        <span class="text-xs text-emerald-400 font-bold">Tasks</span>
     </div>
-    <i class="fa-solid fa-check-circle absolute -bottom-3 -right-3 text-4xl text-emerald-500/10 group-hover:scale-110 transition-transform"></i>
+    <i class="fa-solid fa-check-circle absolute -bottom-3 -right-3 text-6xl text-emerald-500/10 group-hover:scale-110 transition-transform"></i>
   </div>
   
-  <div class="glass-card p-4 border-t-2 border-amber-400 relative overflow-hidden group">
-    <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">Pending (P)</p>
-    <div class="flex items-baseline gap-1.5 relative z-10">
-        <h3 id="pendingStat" class="text-2xl font-black text-white">0</h3>
-        <span class="text-[9px] text-amber-400 font-bold">Tasks</span>
+  <div class="glass-card p-5 border-l-4 border-amber-400 relative overflow-hidden group">
+    <p class="text-[11px] text-slate-300 uppercase font-black tracking-widest mb-2">Pending (P)</p>
+    <div class="flex items-baseline gap-2 relative z-10">
+        <h3 id="pendingStat" class="text-4xl font-black text-white">0</h3>
+        <span class="text-xs text-amber-400 font-bold">Tasks</span>
     </div>
-    <i class="fa-solid fa-clock absolute -bottom-3 -right-3 text-4xl text-amber-500/10 group-hover:scale-110 transition-transform"></i>
+    <i class="fa-solid fa-clock absolute -bottom-3 -right-3 text-6xl text-amber-500/10 group-hover:scale-110 transition-transform"></i>
   </div>
 
-  <div class="glass-card p-4 border-t-2 border-slate-400 relative overflow-hidden group">
-    <p class="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">Not Run (N)</p>
-    <div class="flex items-baseline gap-1.5 relative z-10">
-        <h3 id="notrunStat" class="text-2xl font-black text-white">0</h3>
-        <span class="text-[9px] text-slate-400 font-bold">Tasks</span>
+  <div class="glass-card p-5 border-l-4 border-slate-400 relative overflow-hidden group">
+    <p class="text-[11px] text-slate-300 uppercase font-black tracking-widest mb-2">Not Run (N)</p>
+    <div class="flex items-baseline gap-2 relative z-10">
+        <h3 id="notrunStat" class="text-4xl font-black text-white">0</h3>
+        <span class="text-xs text-slate-400 font-bold">Tasks</span>
     </div>
-    <i class="fa-solid fa-ban absolute -bottom-3 -right-3 text-4xl text-slate-500/10 group-hover:scale-110 transition-transform"></i>
+    <i class="fa-solid fa-ban absolute -bottom-3 -right-3 text-6xl text-slate-500/10 group-hover:scale-110 transition-transform"></i>
   </div>
 
-  <div class="glass-card p-4 border-t-2 border-[#b490ff] bg-[#b490ff]/5 relative overflow-hidden group">
-    <p class="text-[9px] text-[#b490ff] uppercase font-black tracking-widest mb-1">Routine Accuracy</p>
-    <div class="flex items-baseline gap-1.5 relative z-10">
-        <h3 id="percentStat" class="text-2xl font-black text-white">0%</h3>
+  <div class="glass-card p-5 border-l-4 border-[#b490ff] bg-[#b490ff]/5 relative overflow-hidden group">
+    <p class="text-[11px] text-[#b490ff] uppercase font-black tracking-widest mb-2">Routine Accuracy</p>
+    <div class="flex items-baseline gap-2 relative z-10">
+        <h3 id="percentStat" class="text-4xl font-black text-white">0%</h3>
     </div>
-    <i class="fa-solid fa-chart-line absolute -bottom-3 -right-3 text-4xl text-[#b490ff]/10 group-hover:scale-110 transition-transform"></i>
+    <i class="fa-solid fa-chart-line absolute -bottom-3 -right-3 text-6xl text-[#b490ff]/10 group-hover:scale-110 transition-transform"></i>
   </div>
 </section>
 
 <!-- Filters & Charts Row -->
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-5">
-    <div class="xl:col-span-3 flex flex-col gap-4">
-        <div class="glass-card p-4">
-            <div class="space-y-3">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-8">
+    <div class="xl:col-span-3 flex flex-col gap-5">
+        <div class="glass-card p-5">
+            <div class="space-y-4">
                 <div>
-                    <label class="text-[9px] text-slate-400 uppercase font-bold block mb-1">Employee Filter</label>
-                    <select id="employeeSelect" class="w-full bg-black/20 border border-white/10 rounded-md text-[11px] text-slate-200 py-1.5 px-2 outline-none focus:border-[#b490ff] transition-colors"></select>
+                    <label class="text-[11px] text-slate-300 uppercase font-bold block mb-1.5">Employee Filter</label>
+                    <select id="employeeSelect" class="w-full bg-slate-900/50 border border-white/10 rounded-lg text-sm text-slate-200 py-2 px-3 outline-none focus:border-[#b490ff] transition-colors shadow-inner"></select>
                 </div>
                 <div>
-                    <label class="text-[9px] text-slate-400 uppercase font-bold block mb-1">Job Group Filter</label>
-                    <select id="jobTypeSelect" class="w-full bg-black/20 border border-white/10 rounded-md text-[11px] text-slate-200 py-1.5 px-2 outline-none focus:border-[#b490ff] transition-colors"></select>
+                    <label class="text-[11px] text-slate-300 uppercase font-bold block mb-1.5">Job Group / Category</label>
+                    <select id="jobTypeSelect" class="w-full bg-slate-900/50 border border-white/10 rounded-lg text-sm text-slate-200 py-2 px-3 outline-none focus:border-[#b490ff] transition-colors shadow-inner"></select>
                 </div>
             </div>
         </div>
-        <div class="glass-card p-4 flex-1 flex flex-col min-h-[180px]">
-            <h3 class="text-[9px] font-black text-[#b490ff] uppercase tracking-widest mb-2">Status Ratio</h3>
+        <div class="glass-card p-5 flex-1 flex flex-col min-h-[220px]">
+            <h3 class="text-xs font-black text-[#b490ff] uppercase tracking-widest mb-3 text-center">Status Ratio</h3>
             <div class="flex-1 relative w-full h-full flex items-center justify-center">
                 <canvas id="companyChart"></canvas>
             </div>
         </div>
     </div>
     
-    <div class="xl:col-span-9 glass-card p-4 flex flex-col min-h-[250px]">
-        <h3 class="text-[9px] font-black text-[#b490ff] uppercase tracking-widest mb-3 flex justify-between items-center">
+    <div class="xl:col-span-9 glass-card p-6 flex flex-col min-h-[300px]">
+        <h3 class="text-xs font-black text-[#b490ff] uppercase tracking-widest mb-4 flex justify-between items-center">
             <span>Performance Metrics</span>
+            <span class="text-[10px] text-slate-400 font-normal normal-case"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i> Live Data</span>
         </h3>
         <div class="flex-1 relative">
             <canvas id="employeeChart"></canvas>
@@ -175,62 +176,64 @@
 </div>
 
 <!-- Main Content Tables -->
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
   <!-- Routine Matrix -->
-  <div class="xl:col-span-5 glass-card flex flex-col h-[550px] overflow-hidden">
-    <div class="p-3 bg-white/5 border-b border-white/5 flex justify-between items-center">
-        <h2 class="font-black text-emerald-400 text-[11px] uppercase tracking-widest flex items-center gap-1.5">
-            <i class="fa-solid fa-calendar-check"></i> Routine Monitoring
+  <div class="xl:col-span-5 glass-card flex flex-col h-[650px] overflow-hidden">
+    <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center shadow-sm z-10">
+        <h2 class="font-black text-emerald-400 text-sm uppercase tracking-widest flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-lg"></i> Routine Monitoring
         </h2>
-        <span class="text-[8px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded font-bold uppercase" id="routineDateLabel"></span>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded font-bold uppercase" id="routineDateLabel"></span>
     </div>
-    <div id="routineContainer" class="p-3 space-y-3 overflow-y-auto flex-1">
+    <div id="routineContainer" class="p-4 space-y-4 overflow-y-auto flex-1 bg-black/10">
         <!-- Grouped Routine Tasks -->
     </div>
   </div>
 
   <!-- Adhoc & Compliant Column -->
-  <div class="xl:col-span-7 flex flex-col gap-5 h-[550px]">
+  <div class="xl:col-span-7 flex flex-col gap-6 h-[650px]">
       <!-- Adhoc Section -->
       <div class="glass-card flex flex-col flex-1 overflow-hidden">
-        <div class="p-3 bg-white/5 border-b border-sky-500/20">
-            <h2 class="font-black text-sky-400 text-[11px] uppercase tracking-widest flex items-center gap-1.5">
-                <i class="fa-solid fa-bolt"></i> Adhoc Projects
+        <div class="p-4 bg-white/5 border-b border-sky-500/30 shadow-sm">
+            <h2 class="font-black text-sky-400 text-sm uppercase tracking-widest flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-lg"></i> Adhoc Projects
             </h2>
         </div>
-        <div class="overflow-y-auto flex-1 p-1">
+        <div class="overflow-y-auto flex-1 p-2 bg-black/10">
             <table class="w-full text-left">
-                <thead class="text-[8px] text-slate-400 uppercase tracking-widest border-b border-white/5 sticky top-0 bg-[var(--card-purple)] backdrop-blur z-10">
+                <thead class="text-[10px] text-slate-300 uppercase tracking-widest border-b border-white/10 sticky top-0 bg-[var(--card-purple)] backdrop-blur-xl z-10 shadow-sm">
                     <tr>
-                        <th class="px-3 py-2">Task Name</th>
-                        <th class="px-3 py-2 w-1/4">Owner</th>
-                        <th class="px-3 py-2 w-1/6 text-center">Deadline</th>
-                        <th class="px-3 py-2 w-1/6 text-center">Status</th>
+                        <th class="px-4 py-3">Task Name</th>
+                        <th class="px-4 py-3 w-1/4">Category</th>
+                        <th class="px-4 py-3 w-1/5">Owner</th>
+                        <th class="px-4 py-3 w-1/6 text-center">Deadline</th>
+                        <th class="px-4 py-3 w-1/6 text-center">Status</th>
                     </tr>
                 </thead>
-                <tbody id="adhocTableBody" class="divide-y divide-white/5"></tbody>
+                <tbody id="adhocTableBody" class="divide-y divide-white/5 text-sm"></tbody>
             </table>
         </div>
       </div>
 
       <!-- Compliant Section -->
       <div class="glass-card flex flex-col flex-1 overflow-hidden">
-        <div class="p-3 bg-white/5 border-b border-rose-500/20">
-            <h2 class="font-black text-rose-400 text-[11px] uppercase tracking-widest flex items-center gap-1.5">
-                <i class="fa-solid fa-headset"></i> Complaints
+        <div class="p-4 bg-white/5 border-b border-rose-500/30 shadow-sm">
+            <h2 class="font-black text-rose-400 text-sm uppercase tracking-widest flex items-center gap-2">
+                <i class="fa-solid fa-headset text-lg"></i> Complaints
             </h2>
         </div>
-        <div class="overflow-y-auto flex-1 p-1">
+        <div class="overflow-y-auto flex-1 p-2 bg-black/10">
             <table class="w-full text-left">
-                <thead class="text-[8px] text-slate-400 uppercase tracking-widest border-b border-white/5 sticky top-0 bg-[var(--card-purple)] backdrop-blur z-10">
+                <thead class="text-[10px] text-slate-300 uppercase tracking-widest border-b border-white/10 sticky top-0 bg-[var(--card-purple)] backdrop-blur-xl z-10 shadow-sm">
                     <tr>
-                        <th class="px-3 py-2">Subject</th>
-                        <th class="px-3 py-2 w-1/4">Assignee</th>
-                        <th class="px-3 py-2 w-1/6 text-center">Deadline</th>
-                        <th class="px-3 py-2 w-1/6 text-center">Status</th>
+                        <th class="px-4 py-3">Subject</th>
+                        <th class="px-4 py-3 w-1/4">Category</th>
+                        <th class="px-4 py-3 w-1/5">Assignee</th>
+                        <th class="px-4 py-3 w-1/6 text-center">Deadline</th>
+                        <th class="px-4 py-3 w-1/6 text-center">Status</th>
                     </tr>
                 </thead>
-                <tbody id="compliantTableBody" class="divide-y divide-white/5"></tbody>
+                <tbody id="compliantTableBody" class="divide-y divide-white/5 text-sm"></tbody>
             </table>
         </div>
       </div>
@@ -238,7 +241,7 @@
 </div>
 
 <!-- Alert Box -->
-<div id="statusAlert" class="hidden z-[100] fixed top-5 left-1/2 -translate-x-1/2 w-full max-w-xs p-3 rounded-xl shadow-2xl flex items-center gap-3 border animate-bounce"></div>
+<div id="statusAlert" class="hidden z-[100] fixed top-5 left-1/2 -translate-x-1/2 w-full max-w-sm p-4 rounded-xl shadow-2xl flex items-center gap-3 border animate-bounce"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -266,7 +269,7 @@ const appState = {
 
 let chartCompany = null;
 let chartEmployee = null;
-Chart.defaults.color = '#94a3b8';
+Chart.defaults.color = '#cbd5e1'; // text-slate-300
 Chart.defaults.font.family = "'Anuphan', sans-serif";
 
 const el = id => document.getElementById(id);
@@ -277,16 +280,16 @@ function init() {
     appState.selectedDate = todayStr;
     el('dateFilter').value = todayStr;
 
-    const savedLogo = localStorage.getItem('ExecDash_Logo_Final_v2');
+    const savedLogo = localStorage.getItem('ExecDash_Logo_Final_v3');
     if(savedLogo) el('companyLogoImg').src = savedLogo;
-    const savedName = localStorage.getItem('ExecDash_Name_Final_v2');
+    const savedName = localStorage.getItem('ExecDash_Name_Final_v3');
     if(savedName) el('companyNameText').innerText = savedName;
 
     // Firebase Listener
     onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
         const badge = el('connectionBadge');
         badge.innerHTML = `<i class="fa-solid fa-wifi mr-1 text-emerald-400"></i> Connected`;
-        badge.className = "text-[8px] bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase font-bold text-emerald-400 align-middle border border-emerald-500/20";
+        badge.className = "text-[10px] bg-emerald-500/20 px-3 py-1 rounded-full uppercase font-bold text-emerald-400 align-middle border border-emerald-500/30";
 
         if (docSnap.exists()) {
             const remoteData = docSnap.data();
@@ -305,7 +308,7 @@ function init() {
     }, (error) => {
         const badge = el('connectionBadge');
         badge.innerHTML = `<i class="fa-solid fa-lock mr-1"></i> Offline`;
-        badge.className = "text-[8px] bg-rose-500/10 px-2 py-0.5 rounded-full uppercase font-bold text-rose-400 align-middle border border-rose-500/20";
+        badge.className = "text-[10px] bg-rose-500/20 px-3 py-1 rounded-full uppercase font-bold text-rose-400 align-middle border border-rose-500/30";
         showAlert('Connection Failed.', 'rose', 'fa-triangle-exclamation');
     });
 }
@@ -324,7 +327,6 @@ function saveToCloud(showNotif = true) {
         .catch(err => { showAlert('Sync Error: ' + err.message, 'rose', 'fa-xmark'); });
 }
 
-// Window functions
 window.clearDateFilter = () => { el('dateFilter').value = ''; appState.selectedDate = ''; renderUI(); };
 window.forceSync = () => saveToCloud(true);
 window.hardReset = () => { if(confirm('ล้างข้อมูลทั้งหมดในระบบคลาวด์?')) { setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {} }); location.reload(); } };
@@ -336,11 +338,11 @@ window.toggleAccordion = (header) => {
     icon.style.transform = content.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)";
 };
 
+// Data Parsers
 function parseDateKey(k) {
     if (!k) return null;
     let s = String(k).trim();
     if (s.match(/^\d{4}-\d{2}-\d{2}$/)) return s;
-    // Excel Serial Date (e.g., 45000)
     const n = parseFloat(s);
     if (!isNaN(n) && n > 30000 && n < 60000 && !s.includes(/[a-zA-Z]/)) {
         return new Date(Math.round((n - 25569) * 86400 * 1000)).toISOString().slice(0, 10);
@@ -348,27 +350,27 @@ function parseDateKey(k) {
     return null;
 }
 
-function processWorkbook(wb, fileName) {
+// ลบช่องว่างให้ค้นหาได้แม่นยำ (ST009, MR I)
+function cleanKey(s) { return String(s).replace(/\s/g, '').toLowerCase(); }
+
+function processWorkbook(wb) {
     let parsed = [];
     let staff = appState.staffMap || {};
 
     wb.SheetNames.forEach(sheetName => {
         const sLower = sheetName.toLowerCase().replace(/\s/g, '');
-        const fLower = fileName.toLowerCase().replace(/\s/g, '');
-        const sMatch = sLower + fLower; // ตรวจสอบทั้งชื่อชีตและชื่อไฟล์
-        
         const raw = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
         if (!raw.length) return;
 
         // 1. ดึง Master Data และ Company Name
-        if (sMatch.includes('master')) {
+        if (sLower.includes('master')) {
             raw.forEach(row => {
                 row.forEach((cell, cIdx) => {
                     if (String(cell).trim().toLowerCase() === 'company name') {
                         const nameFound = String(row[cIdx + 1] || '').trim();
                         if (nameFound) {
                             el('companyNameText').innerText = nameFound;
-                            localStorage.setItem('ExecDash_Name_Final_v2', nameFound);
+                            localStorage.setItem('ExecDash_Name_Final_v3', nameFound);
                         }
                     }
                 });
@@ -377,28 +379,11 @@ function processWorkbook(wb, fileName) {
                 const name = String(row[1] || '').trim();
                 if (code.startsWith('ST') || code.startsWith('EMP')) {
                     const fullName = name ? `${code} (${name})` : code;
-                    staff[code] = fullName;
-                    if(name) staff[name] = fullName;
+                    staff[cleanKey(code)] = fullName;
+                    if(name) staff[cleanKey(name)] = fullName;
                 }
             });
-            return; // จบการทำงาน Master
-        }
-
-        // 2. จำแนกประเภทงาน (Routine / Compliant / Adhoc)
-        let category = 'Adhoc';
-        let jobType = 'Adhoc Task';
-
-        if (sMatch.includes('group') || sMatch.includes('monitoring') || sMatch.includes('routine')) {
-            category = 'Routine';
-            if (sMatch.includes('groupa')) jobType = 'Group A Monitoring';
-            else if (sMatch.includes('groupb')) jobType = 'Group B Monitoring';
-            else jobType = 'Routine Task';
-        } else if (sMatch.includes('compliant') || sMatch.includes('ร้องเรียน')) {
-            category = 'Compliant';
-            jobType = 'Compliant Management';
-        } else {
-            if (sMatch.includes('adhoca')) jobType = 'Adhoc A';
-            else if (sMatch.includes('adhocb')) jobType = 'Adhoc B';
+            return;
         }
 
         const jsonRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
@@ -408,22 +393,27 @@ function processWorkbook(wb, fileName) {
         const findKey = (arr) => headers.find(h => arr.some(a => String(h).toLowerCase().replace(/\s/g, '').includes(a)));
 
         const taskKey = findKey(['task', 'ชื่องาน', 'jobname']);
-        // 3. รองรับพิมพ์ผิด Onwer -> Owner
-        const ownerKey = findKey(['owner', 'onwer', 'พนักงาน', 'staff']); 
-        const deadlineKey = findKey(['deadline', 'กำหนดส่ง', 'date']);
-        const statusKey = findKey(['status', 'สถานะ']);
+        const ownerKey = findKey(['owner', 'onwer', 'พนักงาน', 'staff']); // จัดการคำผิด Onwer
+        
+        // 2. วิเคราะห์ว่าเป็น Matrix (Routine) อัตโนมัติจากวันที่แนวนอน
+        const dateHeaders = headers.filter(h => parseDateKey(h));
+        const isMatrix = dateHeaders.length >= 2 && taskKey;
 
         if (!taskKey) return;
 
-        jsonRows.forEach(row => {
-            const taskName = String(row[taskKey]).trim();
-            if (!taskName || taskName === 'ไม่ระบุ') return;
+        if (isMatrix) {
+            // ระบบพบว่าเป็นงาน Routine (Matrix)
+            let jobType = 'Routine Monitoring';
+            if (sLower.includes('groupa')) jobType = 'Group A Monitoring';
+            else if (sLower.includes('groupb')) jobType = 'Group B Monitoring';
 
-            const ownerRaw = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
-            const ownerName = staff[ownerRaw] || ownerRaw; // แมพชื่อ ST009 (MR I) ให้สมบูรณ์
+            jsonRows.forEach(row => {
+                const taskName = String(row[taskKey]).trim();
+                if (!taskName || taskName === 'ไม่ระบุ') return;
 
-            if (category === 'Routine') {
-                // Parsing แบบแนวนอน (Matrix)
+                const ownerRaw = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
+                const ownerName = staff[cleanKey(ownerRaw)] || ownerRaw; // รองรับ ST009 (MR I) อัตโนมัติ
+
                 headers.forEach(h => {
                     const dKey = parseDateKey(h);
                     if (dKey) {
@@ -435,13 +425,36 @@ function processWorkbook(wb, fileName) {
                             
                             parsed.push({
                                 id: `R-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
-                                category, jobType, taskName, ownerName, date: dKey, status
+                                category: 'Routine', jobType, taskName, ownerName, date: dKey, status
                             });
                         }
                     }
                 });
-            } else {
-                // Parsing แบบแนวตั้ง (List)
+            });
+        } else {
+            // ระบบ List (Adhoc / Compliant)
+            const catKey = findKey(['category', 'หมวดหมู่']);
+            const deadlineKey = findKey(['deadline', 'กำหนดส่ง', 'date']);
+            const statusKey = findKey(['status', 'สถานะ']);
+
+            jsonRows.forEach(row => {
+                const taskName = String(row[taskKey]).trim();
+                if (!taskName || taskName === 'ไม่ระบุ') return;
+
+                const ownerRaw = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
+                const ownerName = staff[cleanKey(ownerRaw)] || ownerRaw;
+
+                // ตรวจจับหมวดหมู่ (Category / JobType)
+                const rowCatVal = catKey ? String(row[catKey]).trim() : '';
+                let rowCategory = 'Adhoc';
+                let rowJobType = rowCatVal || 'Adhoc Task'; // เอา "ตรวจสอบข้อมูล" หรืออื่นๆ ไปใส่ในช่อง Category(jobType)
+
+                // แยก Compliant 
+                if (rowCatVal.includes('ร้องเรียน') || sLower.includes('compliant')) {
+                    rowCategory = 'Compliant';
+                    if (!rowCatVal) rowJobType = 'Compliant Management';
+                }
+
                 const dKey = deadlineKey ? parseDateKey(row[deadlineKey]) : '';
                 const sVal = statusKey ? String(row[statusKey]).toUpperCase() : '';
                 let status = 'not run';
@@ -450,10 +463,10 @@ function processWorkbook(wb, fileName) {
 
                 parsed.push({
                     id: `A-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
-                    category, jobType, taskName, ownerName, date: dKey, status
+                    category: rowCategory, jobType: rowJobType, taskName, ownerName, date: dKey, status
                 });
-            }
-        });
+            });
+        }
     });
     
     appState.staffMap = staff;
@@ -468,7 +481,11 @@ el('fileUpload').onchange = async (e) => {
     for(let f of files) {
         const buf = await f.arrayBuffer();
         const wb = XLSX.read(buf, { type: 'array' });
-        allNewTasks = [...allNewTasks, ...processWorkbook(wb, f.name)];
+        // หลอกตั้งชื่อชีตให้เข้ากับชื่อไฟล์กรณีเป็นไฟล์ CSV
+        if (wb.SheetNames.length === 1 && f.name.includes('csv')) {
+            wb.SheetNames[0] = f.name.replace('.csv', '');
+        }
+        allNewTasks = [...allNewTasks, ...processWorkbook(wb)];
     }
 
     // รวมไฟล์และไม่ให้ข้อมูลซ้ำ
@@ -484,9 +501,9 @@ el('fileUpload').onchange = async (e) => {
 
 function updateDropdowns() {
     const emps = [...new Set(appState.tasks.map(t => t.ownerName))].sort();
-    el('employeeSelect').innerHTML = '<option value="all">Everyone</option>' + emps.map(n => `<option value="${n}">${n}</option>`).join('');
+    el('employeeSelect').innerHTML = '<option value="all">ทุกคน (All)</option>' + emps.map(n => `<option value="${n}">${n}</option>`).join('');
     const types = [...new Set(appState.tasks.map(t => t.jobType))].sort();
-    el('jobTypeSelect').innerHTML = '<option value="all">All Groups</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+    el('jobTypeSelect').innerHTML = '<option value="all">ทุกกลุ่มงาน (All)</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
 }
 
 function renderUI() {
@@ -511,6 +528,8 @@ function renderUI() {
 
     const adhoc = filtered.filter(t => t.category === 'Adhoc');
     const comp = filtered.filter(t => t.category === 'Compliant');
+    
+    // ตาราง Adhoc (มี column category)
     el('adhocTableBody').innerHTML = renderRows(adhoc);
     el('compliantTableBody').innerHTML = renderRows(comp);
 
@@ -519,14 +538,15 @@ function renderUI() {
 }
 
 function renderRows(tasks) {
-    if(!tasks.length) return '<tr><td colspan="4" class="py-10 text-center text-slate-500 font-bold uppercase tracking-widest text-[9px]">No Data Found</td></tr>';
+    if(!tasks.length) return '<tr><td colspan="5" class="py-12 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">No Data Found</td></tr>';
     return tasks.map(t => `
         <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
-            <td class="px-3 py-3"><div class="text-[10px] font-bold ${t.status==='done'?'text-slate-500 line-through':'text-slate-200'} truncate w-32 md:w-48" title="${t.taskName}">${t.taskName}</div></td>
-            <td class="px-3 py-3 text-[9px] text-[#b490ff] font-black truncate w-24">${t.ownerName}</td>
-            <td class="px-3 py-3 text-[9px] text-slate-400 font-mono text-center">${t.date || '-'}</td>
-            <td class="px-3 py-3 text-center">
-                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/40 border ${t.status==='done'?'border-emerald-500/50 text-emerald-400':'border-white/10 text-slate-400'} text-[9px] rounded py-1 pl-2 pr-5 outline-none font-bold">
+            <td class="px-4 py-4"><div class="text-xs font-bold ${t.status==='done'?'text-slate-500 line-through':'text-white'} truncate w-32 xl:w-48" title="${t.taskName}">${t.taskName}</div></td>
+            <td class="px-4 py-4"><span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider truncate inline-block max-w-[120px]">${t.jobType}</span></td>
+            <td class="px-4 py-4 text-[11px] text-[#b490ff] font-black truncate w-24">${t.ownerName}</td>
+            <td class="px-4 py-4 text-[11px] text-slate-400 font-mono text-center">${t.date || '-'}</td>
+            <td class="px-4 py-4 text-center">
+                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/40 border ${t.status==='done'?'border-emerald-500/50 text-emerald-400':'border-white/10 text-slate-400'} text-[11px] rounded py-1 pl-2 pr-6 outline-none font-bold shadow-sm">
                     <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
                     <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
                     <option value="done" ${t.status==='done'?'selected':''}>S</option>
@@ -539,7 +559,7 @@ function renderRows(tasks) {
 function renderRoutineMatrix(tasks) {
     const cont = el('routineContainer');
     if(!tasks.length) {
-        cont.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-500 opacity-60"><i class="fa-regular fa-folder-open text-3xl mb-3"></i><p class="text-[9px] font-black uppercase">Please select a date</p></div>`;
+        cont.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-500 opacity-80"><i class="fa-regular fa-folder-open text-4xl mb-4"></i><p class="text-[11px] font-black uppercase">Please select a date</p></div>`;
         return;
     }
     
@@ -551,27 +571,27 @@ function renderRoutineMatrix(tasks) {
         const done = g.filter(x => x.status === 'done').length;
         const pct = Math.round((done / g.length) * 100);
         return `
-        <div class="bg-black/20 rounded-xl border border-white/5 overflow-hidden shadow-md">
-            <div class="p-3 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors" onclick="toggleAccordion(this)">
+        <div class="bg-slate-900/60 rounded-xl border border-white/5 overflow-hidden shadow-md">
+            <div class="p-4 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors" onclick="toggleAccordion(this)">
                 <div class="flex-1">
-                    <h4 class="text-[10px] font-black text-[#b490ff] uppercase tracking-widest mb-1.5">${name}</h4>
-                    <div class="w-full bg-black/50 h-1.5 rounded-full overflow-hidden">
+                    <h4 class="text-[11px] font-black text-[#b490ff] uppercase tracking-widest mb-2">${name}</h4>
+                    <div class="w-full bg-black/60 h-2 rounded-full overflow-hidden shadow-inner">
                         <div class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct}%"></div>
                     </div>
                 </div>
-                <div class="ml-4 text-right">
-                    <span class="text-sm font-black text-white block">${pct}%</span>
-                    <i class="fa-solid fa-chevron-down text-slate-500 text-[8px] transition-transform"></i>
+                <div class="ml-5 text-right">
+                    <span class="text-base font-black text-white block">${pct}%</span>
+                    <i class="fa-solid fa-chevron-down text-slate-500 text-[10px] transition-transform"></i>
                 </div>
             </div>
-            <div class="p-1.5 space-y-0.5 border-t border-white/5">
+            <div class="p-2 border-t border-white/5 space-y-1">
                 ${g.map(t => `
-                    <div class="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors group">
-                        <div class="flex-1 min-w-0 pr-2">
-                            <p class="text-[10px] font-bold ${t.status==='done'?'text-slate-600 line-through':'text-slate-200'} truncate" title="${t.taskName}">${t.taskName}</p>
-                            <span class="text-[8px] text-[#b490ff] font-bold uppercase">${t.ownerName}</span>
+                    <div class="flex items-center justify-between p-2.5 rounded-lg hover:bg-white/5 transition-colors group">
+                        <div class="flex-1 min-w-0 pr-3">
+                            <p class="text-xs font-bold ${t.status==='done'?'text-slate-600 line-through':'text-slate-200'} truncate" title="${t.taskName}">${t.taskName}</p>
+                            <span class="text-[10px] text-[#b490ff] font-bold uppercase">${t.ownerName}</span>
                         </div>
-                        <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/60 border ${t.status==='done'?'border-emerald-500/30 text-emerald-400':'border-white/5 text-slate-500'} text-[8px] rounded py-1 pl-2 pr-5 outline-none font-bold">
+                        <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/60 border ${t.status==='done'?'border-emerald-500/30 text-emerald-400':'border-white/10 text-slate-400'} text-[10px] rounded py-1 pl-2 pr-6 outline-none font-bold shadow-sm">
                             <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
                             <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
                             <option value="done" ${t.status==='done'?'selected':''}>S</option>
@@ -614,23 +634,23 @@ function renderCharts(tasks) {
         data: {
             labels,
             datasets: [
-                { label: 'S', data: labels.map(l => empStats[l].s), backgroundColor: '#34d399', borderRadius: 3 },
-                { label: 'P', data: labels.map(l => empStats[l].p), backgroundColor: '#fbbf24', borderRadius: 3 },
-                { label: 'N', data: labels.map(l => empStats[l].n), backgroundColor: '#64748b', borderRadius: 3 }
+                { label: 'S', data: labels.map(l => empStats[l].s), backgroundColor: '#34d399', borderRadius: 4 },
+                { label: 'P', data: labels.map(l => empStats[l].p), backgroundColor: '#fbbf24', borderRadius: 4 },
+                { label: 'N', data: labels.map(l => empStats[l].n), backgroundColor: '#64748b', borderRadius: 4 }
             ]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            scales: { x: { stacked: true, grid: { display: false }, ticks:{font:{size:8}} }, y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks:{font:{size:8}} } },
-            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 6, font: { size: 8 } } } }
+            scales: { x: { stacked: true, grid: { display: false }, ticks:{font:{size:10}} }, y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks:{font:{size:10}} } },
+            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, font: { size: 10 } } } }
         }
     });
 }
 
 function showAlert(msg, color, icon) {
     const a = el('statusAlert');
-    a.className = `z-[100] fixed top-5 left-1/2 -translate-x-1/2 w-full max-w-xs p-3 rounded-lg shadow-2xl flex items-center gap-2.5 bg-${color}-500/90 text-white border border-${color}-400/50 backdrop-blur-md animate-bounce`;
-    a.innerHTML = `<i class="fa-solid ${icon} text-base"></i> <div class="font-bold text-[10px] uppercase tracking-widest">${msg}</div>`;
+    a.className = `z-[100] fixed top-5 left-1/2 -translate-x-1/2 w-full max-w-sm p-3.5 rounded-xl shadow-2xl flex items-center gap-3 bg-${color}-500/90 text-white border border-${color}-400/50 backdrop-blur-md animate-bounce`;
+    a.innerHTML = `<i class="fa-solid ${icon} text-xl"></i> <div class="font-bold text-xs uppercase tracking-widest">${msg}</div>`;
     a.classList.remove('hidden');
     setTimeout(() => a.classList.add('hidden'), 3500);
 }
@@ -643,7 +663,7 @@ el('logoUpload').onchange = (e) => {
     const f = e.target.files[0];
     if (f) {
         const r = new FileReader();
-        r.onload = (ev) => { el('companyLogoImg').src = ev.target.result; localStorage.setItem('ExecDash_Logo_Final_v2', ev.target.result); };
+        r.onload = (ev) => { el('companyLogoImg').src = ev.target.result; localStorage.setItem('ExecDash_Logo_Final_v3', ev.target.result); };
         r.readAsDataURL(f);
     }
 };
