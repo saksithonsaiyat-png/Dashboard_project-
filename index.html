@@ -15,11 +15,9 @@
     @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;600;700&display=swap');
     
     :root {
-      /* โทนสีม่วงเข้มพาสเทล (Dark Pastel Purple) */
       --bg-dark-purple: #2c2541;
       --card-purple: rgba(65, 53, 89, 0.75);
       --accent-purple: #b490ff;
-      --accent-hover: #9c73f8;
     }
 
     body {
@@ -269,7 +267,7 @@ const appState = {
 
 let chartCompany = null;
 let chartEmployee = null;
-Chart.defaults.color = '#cbd5e1'; // text-slate-300
+Chart.defaults.color = '#cbd5e1';
 Chart.defaults.font.family = "'Anuphan', sans-serif";
 
 const el = id => document.getElementById(id);
@@ -280,12 +278,12 @@ function init() {
     appState.selectedDate = todayStr;
     el('dateFilter').value = todayStr;
 
-    const savedLogo = localStorage.getItem('ExecDash_Logo_Final_v3');
+    // เปลี่ยน Key LocalStorage เพื่อล้างข้อมูลเก่า
+    const savedLogo = localStorage.getItem('ExecDash_Logo_Final_v4');
     if(savedLogo) el('companyLogoImg').src = savedLogo;
-    const savedName = localStorage.getItem('ExecDash_Name_Final_v3');
+    const savedName = localStorage.getItem('ExecDash_Name_Final_v4');
     if(savedName) el('companyNameText').innerText = savedName;
 
-    // Firebase Listener
     onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
         const badge = el('connectionBadge');
         badge.innerHTML = `<i class="fa-solid fa-wifi mr-1 text-emerald-400"></i> Connected`;
@@ -350,31 +348,33 @@ function parseDateKey(k) {
     return null;
 }
 
-// ลบช่องว่างให้ค้นหาได้แม่นยำ (ST009, MR I)
 function cleanKey(s) { return String(s).replace(/\s/g, '').toLowerCase(); }
 
-function processWorkbook(wb) {
+function processWorkbook(wb, fileName) {
     let parsed = [];
     let staff = appState.staffMap || {};
+    let fLower = String(fileName).toLowerCase().replace(/\s/g, '');
 
     wb.SheetNames.forEach(sheetName => {
         const sLower = sheetName.toLowerCase().replace(/\s/g, '');
-        const raw = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
-        if (!raw.length) return;
-
-        // 1. ดึง Master Data และ Company Name
-        if (sLower.includes('master')) {
+        const sMatch = sLower + fLower; // ตรวจจับทั้งชื่อชีตและชื่อไฟล์
+        
+        // 1. ตรวจหา Master Data
+        if (sMatch.includes('master')) {
+            const raw = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
             raw.forEach(row => {
+                // ดึงชื่อบริษัทแบบแม่นยำ (ช่องข้างๆ คำว่า Company Name)
                 row.forEach((cell, cIdx) => {
                     if (String(cell).trim().toLowerCase() === 'company name') {
                         const nameFound = String(row[cIdx + 1] || '').trim();
                         if (nameFound) {
                             el('companyNameText').innerText = nameFound;
-                            localStorage.setItem('ExecDash_Name_Final_v3', nameFound);
+                            localStorage.setItem('ExecDash_Name_Final_v4', nameFound);
                         }
                     }
                 });
 
+                // ดึงพนักงาน
                 const code = String(row[0] || '').trim();
                 const name = String(row[1] || '').trim();
                 if (code.startsWith('ST') || code.startsWith('EMP')) {
@@ -386,33 +386,38 @@ function processWorkbook(wb) {
             return;
         }
 
+        // อ่านข้อมูลตารางปกติ
         const jsonRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
         if (!jsonRows.length) return;
 
         const headers = Object.keys(jsonRows[0]);
         const findKey = (arr) => headers.find(h => arr.some(a => String(h).toLowerCase().replace(/\s/g, '').includes(a)));
 
-        const taskKey = findKey(['task', 'ชื่องาน', 'jobname']);
-        const ownerKey = findKey(['owner', 'onwer', 'พนักงาน', 'staff']); // จัดการคำผิด Onwer
-        
-        // 2. วิเคราะห์ว่าเป็น Matrix (Routine) อัตโนมัติจากวันที่แนวนอน
-        const dateHeaders = headers.filter(h => parseDateKey(h));
-        const isMatrix = dateHeaders.length >= 2 && taskKey;
+        // 2. จำแนกหมวดหมู่หลัก (Routine vs Adhoc vs Compliant)
+        let mainCategory = 'Adhoc';
+        if (sMatch.includes('group') || sMatch.includes('monitoring') || sMatch.includes('routine')) {
+            mainCategory = 'Routine';
+        } else if (sMatch.includes('compliant') || sMatch.includes('ร้องเรียน') || sMatch.includes('complaint')) {
+            mainCategory = 'Compliant';
+        }
 
-        if (!taskKey) return;
+        // 3. แยกการอ่านข้อมูล
+        if (mainCategory === 'Routine') {
+            // *** อ่านแบบ Routine (Matrix แนวนอน) ***
+            const taskKey = findKey(['task', 'ชื่องาน']);
+            const ownerKey = findKey(['owner', 'onwer', 'พนักงาน']); // ดักจับคำว่า Onwer
+            if(!taskKey) return;
 
-        if (isMatrix) {
-            // ระบบพบว่าเป็นงาน Routine (Matrix)
             let jobType = 'Routine Monitoring';
-            if (sLower.includes('groupa')) jobType = 'Group A Monitoring';
-            else if (sLower.includes('groupb')) jobType = 'Group B Monitoring';
+            if (sMatch.includes('groupa')) jobType = 'Group A Monitoring';
+            else if (sMatch.includes('groupb')) jobType = 'Group B Monitoring';
 
             jsonRows.forEach(row => {
                 const taskName = String(row[taskKey]).trim();
-                if (!taskName || taskName === 'ไม่ระบุ') return;
+                if (!taskName || taskName.toLowerCase() === 'ไม่ระบุ') return;
 
                 const ownerRaw = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
-                const ownerName = staff[cleanKey(ownerRaw)] || ownerRaw; // รองรับ ST009 (MR I) อัตโนมัติ
+                const ownerName = staff[cleanKey(ownerRaw)] || ownerRaw;
 
                 headers.forEach(h => {
                     const dKey = parseDateKey(h);
@@ -431,39 +436,41 @@ function processWorkbook(wb) {
                     }
                 });
             });
+
         } else {
-            // ระบบ List (Adhoc / Compliant)
-            const catKey = findKey(['category', 'หมวดหมู่']);
+            // *** อ่านแบบ Adhoc / Compliant (List แนวตั้ง) ***
+            const taskKey = findKey(['jobname', 'task', 'ชื่องาน']); // ดึง Adhoc A, B เป็น Task Name
+            const catKey = findKey(['category', 'หมวดหมู่']); // ดึง ตรวจสอบข้อมูล เป็น Category (jobType)
+            const ownerKey = findKey(['owner', 'onwer', 'พนักงาน']);
             const deadlineKey = findKey(['deadline', 'กำหนดส่ง', 'date']);
             const statusKey = findKey(['status', 'สถานะ']);
 
+            if(!taskKey) return;
+
             jsonRows.forEach(row => {
                 const taskName = String(row[taskKey]).trim();
-                if (!taskName || taskName === 'ไม่ระบุ') return;
+                if (!taskName || taskName.toLowerCase() === 'ไม่ระบุ') return;
 
                 const ownerRaw = ownerKey ? String(row[ownerKey]).trim() : 'ไม่ระบุ';
                 const ownerName = staff[cleanKey(ownerRaw)] || ownerRaw;
-
-                // ตรวจจับหมวดหมู่ (Category / JobType)
+                
+                // นำหมวดหมู่ในไฟล์ (เช่น ตรวจสอบข้อมูล) มาใส่เป็น jobType
                 const rowCatVal = catKey ? String(row[catKey]).trim() : '';
-                let rowCategory = 'Adhoc';
-                let rowJobType = rowCatVal || 'Adhoc Task'; // เอา "ตรวจสอบข้อมูล" หรืออื่นๆ ไปใส่ในช่อง Category(jobType)
-
-                // แยก Compliant 
-                if (rowCatVal.includes('ร้องเรียน') || sLower.includes('compliant')) {
-                    rowCategory = 'Compliant';
-                    if (!rowCatVal) rowJobType = 'Compliant Management';
-                }
+                let jobType = rowCatVal || (mainCategory === 'Compliant' ? 'Compliant Management' : 'Adhoc Task');
+                
+                // หากในตารางระบุว่าเป็น ร้องเรียน ให้ย้ายเข้าหมวด Compliant
+                if(rowCatVal.includes('ร้องเรียน')) mainCategory = 'Compliant';
 
                 const dKey = deadlineKey ? parseDateKey(row[deadlineKey]) : '';
                 const sVal = statusKey ? String(row[statusKey]).toUpperCase() : '';
+                
                 let status = 'not run';
                 if (sVal.includes('SUCCESS') || sVal === 'S') status = 'done';
                 else if (sVal.includes('PENDING') || sVal === 'P' || sVal.includes('OVERDUE')) status = 'pending';
 
                 parsed.push({
                     id: `A-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
-                    category: rowCategory, jobType: rowJobType, taskName, ownerName, date: dKey, status
+                    category: mainCategory, jobType, taskName, ownerName, date: dKey, status
                 });
             });
         }
@@ -481,14 +488,10 @@ el('fileUpload').onchange = async (e) => {
     for(let f of files) {
         const buf = await f.arrayBuffer();
         const wb = XLSX.read(buf, { type: 'array' });
-        // หลอกตั้งชื่อชีตให้เข้ากับชื่อไฟล์กรณีเป็นไฟล์ CSV
-        if (wb.SheetNames.length === 1 && f.name.includes('csv')) {
-            wb.SheetNames[0] = f.name.replace('.csv', '');
-        }
-        allNewTasks = [...allNewTasks, ...processWorkbook(wb)];
+        // ส่งชื่อไฟล์ไปด้วย เพื่อให้ระบบวิเคราะห์ประเภทงานได้แม่นยำขึ้น
+        allNewTasks = [...allNewTasks, ...processWorkbook(wb, f.name)];
     }
 
-    // รวมไฟล์และไม่ให้ข้อมูลซ้ำ
     const existingMap = new Map(appState.tasks.map(t => [`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t]));
     allNewTasks.forEach(t => existingMap.set(`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t));
     appState.tasks = Array.from(existingMap.values());
@@ -529,7 +532,6 @@ function renderUI() {
     const adhoc = filtered.filter(t => t.category === 'Adhoc');
     const comp = filtered.filter(t => t.category === 'Compliant');
     
-    // ตาราง Adhoc (มี column category)
     el('adhocTableBody').innerHTML = renderRows(adhoc);
     el('compliantTableBody').innerHTML = renderRows(comp);
 
@@ -542,7 +544,7 @@ function renderRows(tasks) {
     return tasks.map(t => `
         <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
             <td class="px-4 py-4"><div class="text-xs font-bold ${t.status==='done'?'text-slate-500 line-through':'text-white'} truncate w-32 xl:w-48" title="${t.taskName}">${t.taskName}</div></td>
-            <td class="px-4 py-4"><span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider truncate inline-block max-w-[120px]">${t.jobType}</span></td>
+            <td class="px-4 py-4"><span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider truncate inline-block max-w-[120px]" title="${t.jobType}">${t.jobType}</span></td>
             <td class="px-4 py-4 text-[11px] text-[#b490ff] font-black truncate w-24">${t.ownerName}</td>
             <td class="px-4 py-4 text-[11px] text-slate-400 font-mono text-center">${t.date || '-'}</td>
             <td class="px-4 py-4 text-center">
@@ -663,7 +665,7 @@ el('logoUpload').onchange = (e) => {
     const f = e.target.files[0];
     if (f) {
         const r = new FileReader();
-        r.onload = (ev) => { el('companyLogoImg').src = ev.target.result; localStorage.setItem('ExecDash_Logo_Final_v3', ev.target.result); };
+        r.onload = (ev) => { el('companyLogoImg').src = ev.target.result; localStorage.setItem('ExecDash_Logo_Final_v4', ev.target.result); };
         r.readAsDataURL(f);
     }
 };
