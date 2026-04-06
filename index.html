@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   
-  <title>Executive Task Dashboard - Final Version</title>
+  <title>Executive Task Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -13,20 +13,29 @@
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;600;700&display=swap');
+    
+    :root {
+      --bg-dark-purple: #2A2438;
+      --card-purple: rgba(53, 47, 68, 0.7);
+      --accent-purple: #A685E2;
+    }
+
     body {
-      background-color: #0f172a;
-      background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 400px),
-                        radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.1), transparent 400px);
+      background-color: var(--bg-dark-purple);
+      background-image: radial-gradient(circle at top right, rgba(166, 133, 226, 0.15), transparent 400px),
+                        radial-gradient(circle at bottom left, rgba(153, 102, 255, 0.1), transparent 400px);
       font-family: 'Anuphan', sans-serif;
       color: #e2e8f0;
     }
+    
     .glass-card {
-      background: rgba(30, 41, 59, 0.7);
+      background: var(--card-purple);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px);
-      border-radius: 1.25rem;
-      box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
     }
+    
     .status-select {
         appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -34,56 +43,57 @@
         background-position: right 0.5rem center;
         background-size: 1em 1em;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: #7e6bbd; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #A685E2; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
   </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 pb-24">
+<body class="min-h-screen p-4 md:p-6 pb-20">
 
 <!-- Header -->
-<header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10 border-b border-white/5 pb-8">
-  <div class="flex items-center gap-6">
-    <label class="w-20 h-20 rounded-3xl bg-indigo-500/10 shadow-2xl flex items-center justify-center overflow-hidden border border-indigo-500/30 shrink-0 cursor-pointer hover:scale-105 transition-all group relative">
-        <img id="companyLogoImg" src="https://placehold.co/200x200/1e293b/4f46e5?text=LOGO" alt="Logo" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-indigo-600/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <i class="fa-solid fa-camera text-white text-xl"></i>
+<header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5 mb-8 border-b border-white/5 pb-6">
+  <div class="flex items-center gap-4">
+    <label class="w-16 h-16 rounded-2xl bg-purple-500/10 shadow-lg flex items-center justify-center overflow-hidden border border-purple-400/30 shrink-0 cursor-pointer hover:scale-105 transition-all group relative">
+        <img id="companyLogoImg" src="https://placehold.co/150x150/2A2438/A685E2?text=LOGO" alt="Logo" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-purple-900/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <i class="fa-solid fa-camera text-white"></i>
         </div>
         <input type="file" id="logoUpload" accept="image/*" class="hidden">
     </label>
     <div>
-        <h2 id="companyNameText" class="text-xs font-black text-indigo-400 uppercase tracking-[0.3em] mb-2 outline-none border-b border-transparent hover:border-indigo-500 transition-all cursor-text" contenteditable="true">
-            YOUR ORGANIZATION
+        <h2 id="companyNameText" class="text-xs font-black text-[#A685E2] uppercase tracking-[0.2em] mb-1 outline-none border-b border-transparent hover:border-[#A685E2] transition-all cursor-text" contenteditable="true" title="ชื่อบริษัท (โหลดอัตโนมัติจาก Master Data)">
+            COMPANY NAME
         </h2>
-        <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight flex items-center gap-4">
-            Executive Cloud Dashboard
-            <span id="connectionBadge" class="text-[10px] bg-slate-800 px-3 py-1.5 rounded-full uppercase font-bold text-slate-400 align-middle">
+        <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+            Executive Dashboard
+            <span id="connectionBadge" class="text-[9px] bg-slate-800 px-2 py-1 rounded-full uppercase font-bold text-slate-400 align-middle">
                 <i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing
             </span>
         </h1>
-        <p class="text-slate-400 text-sm mt-1">ระบบติดตามงานแบบเรียลไทม์ เชื่อมโยงข้อมูลผ่านระบบคลาวด์</p>
     </div>
   </div>
   
-  <div class="flex flex-wrap items-center gap-3">
-    <div class="glass-card px-5 py-3 flex items-center gap-3 border-indigo-500/20 bg-indigo-500/5">
-      <label class="text-[10px] text-indigo-300 font-black uppercase tracking-widest">Select Date</label>
-      <input id="dateFilter" type="date" class="bg-transparent border-none text-white text-sm focus:ring-0 cursor-pointer font-bold outline-none" />
-      <button onclick="clearDateFilter()" class="ml-2 text-indigo-400 hover:text-white text-[10px] font-black uppercase bg-white/5 px-2 py-1 rounded transition-colors">
+  <div class="flex flex-wrap items-center gap-2">
+    <div class="glass-card px-4 py-2 flex items-center gap-2 border-[#A685E2]/20 bg-[#A685E2]/5">
+      <label class="text-[9px] text-[#A685E2] font-black uppercase tracking-widest">Date:</label>
+      <input id="dateFilter" type="date" class="bg-transparent border-none text-white text-xs focus:ring-0 cursor-pointer font-bold outline-none" />
+      <button onclick="clearDateFilter()" class="ml-2 text-[#A685E2] hover:text-white text-[9px] font-black uppercase bg-white/5 px-2 py-1 rounded transition-colors" title="ดูงานทุกวัน">
         View All
       </button>
     </div>
     
-    <label class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl text-sm font-black flex items-center gap-2 cursor-pointer shadow-xl shadow-indigo-500/20 transition-all active:scale-95">
-      <i class="fa-solid fa-file-arrow-up"></i> IMPORT EXCEL
+    <label class="bg-[#7e6bbd] hover:bg-[#A685E2] text-white px-4 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 cursor-pointer shadow-lg shadow-[#A685E2]/20 transition-all active:scale-95">
+      <i class="fa-solid fa-file-excel"></i> IMPORT FILE
       <input id="fileUpload" type="file" accept=".xlsx,.xls,.csv" class="hidden" multiple />
     </label>
 
-    <div class="flex items-center gap-2">
-        <button onclick="forceSync()" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all" title="Force Cloud Sync">
+    <div class="flex items-center gap-1.5">
+        <button onclick="forceSync()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all text-xs" title="บังคับซิงค์คลาวด์">
             <i class="fa-solid fa-arrows-rotate"></i>
         </button>
-        <button onclick="hardReset()" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white transition-all" title="Clear All Data">
+        <button onclick="hardReset()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white transition-all text-xs" title="ล้างข้อมูลทั้งหมด">
             <i class="fa-solid fa-trash-can"></i>
         </button>
     </div>
@@ -91,103 +101,108 @@
 </header>
 
 <!-- Stats Grid -->
-<section class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-  <div class="glass-card p-6 border-l-4 border-emerald-500">
-    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2">Completed (S)</p>
-    <div class="flex items-baseline gap-2">
-        <h3 id="successStat" class="text-5xl font-black text-white">0</h3>
-        <span class="text-xs text-emerald-500 font-bold">Tasks</span>
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="glass-card p-4 border-t-2 border-emerald-400 relative overflow-hidden group">
+    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Success (S)</p>
+    <div class="flex items-baseline gap-2 relative z-10">
+        <h3 id="successStat" class="text-3xl font-black text-white">0</h3>
+        <span class="text-[10px] text-emerald-400 font-bold">Tasks</span>
     </div>
+    <i class="fa-solid fa-check-circle absolute -bottom-4 -right-4 text-5xl text-emerald-500/10 group-hover:scale-110 transition-transform"></i>
   </div>
-  <div class="glass-card p-6 border-l-4 border-amber-500">
-    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2">In Progress (P)</p>
-    <div class="flex items-baseline gap-2">
-        <h3 id="pendingStat" class="text-5xl font-black text-white">0</h3>
-        <span class="text-xs text-amber-500 font-bold">Tasks</span>
+  
+  <div class="glass-card p-4 border-t-2 border-amber-400 relative overflow-hidden group">
+    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Pending (P)</p>
+    <div class="flex items-baseline gap-2 relative z-10">
+        <h3 id="pendingStat" class="text-3xl font-black text-white">0</h3>
+        <span class="text-[10px] text-amber-400 font-bold">Tasks</span>
     </div>
+    <i class="fa-solid fa-clock absolute -bottom-4 -right-4 text-5xl text-amber-500/10 group-hover:scale-110 transition-transform"></i>
   </div>
-  <div class="glass-card p-6 border-l-4 border-slate-600">
-    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2">Not Started (N)</p>
-    <div class="flex items-baseline gap-2">
-        <h3 id="notrunStat" class="text-5xl font-black text-white">0</h3>
-        <span class="text-xs text-slate-400 font-bold">Tasks</span>
+
+  <div class="glass-card p-4 border-t-2 border-slate-500 relative overflow-hidden group">
+    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Not Run (N)</p>
+    <div class="flex items-baseline gap-2 relative z-10">
+        <h3 id="notrunStat" class="text-3xl font-black text-white">0</h3>
+        <span class="text-[10px] text-slate-400 font-bold">Tasks</span>
     </div>
+    <i class="fa-solid fa-ban absolute -bottom-4 -right-4 text-5xl text-slate-500/10 group-hover:scale-110 transition-transform"></i>
   </div>
-  <div class="glass-card p-6 border-l-4 border-indigo-500 bg-indigo-500/5">
-    <p class="text-[10px] text-indigo-400 uppercase font-black tracking-widest mb-2">Routine Accuracy</p>
-    <div class="flex items-baseline gap-2">
-        <h3 id="percentStat" class="text-5xl font-black text-white">0%</h3>
+
+  <div class="glass-card p-4 border-t-2 border-[#A685E2] bg-[#A685E2]/5 relative overflow-hidden group">
+    <p class="text-[10px] text-[#A685E2] uppercase font-bold tracking-widest mb-1">Routine Accuracy</p>
+    <div class="flex items-baseline gap-2 relative z-10">
+        <h3 id="percentStat" class="text-3xl font-black text-white">0%</h3>
     </div>
+    <i class="fa-solid fa-chart-line absolute -bottom-4 -right-4 text-5xl text-[#A685E2]/10 group-hover:scale-110 transition-transform"></i>
   </div>
 </section>
 
 <!-- Filters & Charts Row -->
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-10">
-    <div class="xl:col-span-3 space-y-6">
-        <div class="glass-card p-6 space-y-6">
-            <h3 class="text-xs font-black text-white uppercase tracking-widest border-b border-white/5 pb-4">Global Filters</h3>
-            <div class="space-y-4">
-                <div class="space-y-2">
-                    <label class="text-[10px] text-slate-500 uppercase font-bold">Employee</label>
-                    <select id="employeeSelect" class="w-full bg-slate-900/50 border border-white/10 rounded-xl text-sm text-slate-200 py-3 px-4 outline-none focus:border-indigo-500 transition-colors"></select>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-6">
+    <div class="xl:col-span-3 flex flex-col gap-4">
+        <div class="glass-card p-4">
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[9px] text-slate-400 uppercase font-bold block mb-1">Employee</label>
+                    <select id="employeeSelect" class="w-full bg-black/20 border border-white/10 rounded-lg text-xs text-slate-200 py-2 px-3 outline-none focus:border-[#A685E2] transition-colors"></select>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] text-slate-500 uppercase font-bold">Business Unit / Job Group</label>
-                    <select id="jobTypeSelect" class="w-full bg-slate-900/50 border border-white/10 rounded-xl text-sm text-slate-200 py-3 px-4 outline-none focus:border-indigo-500 transition-colors"></select>
+                <div>
+                    <label class="text-[9px] text-slate-400 uppercase font-bold block mb-1">Job Group / BU</label>
+                    <select id="jobTypeSelect" class="w-full bg-black/20 border border-white/10 rounded-lg text-xs text-slate-200 py-2 px-3 outline-none focus:border-[#A685E2] transition-colors"></select>
                 </div>
             </div>
         </div>
-        <div class="glass-card p-6 aspect-square flex flex-col">
-            <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6">Status Ratio</h3>
-            <div class="flex-1 relative">
+        <div class="glass-card p-4 flex-1 flex flex-col min-h-[220px]">
+            <h3 class="text-[10px] font-black text-[#A685E2] uppercase tracking-widest mb-2">Status Ratio</h3>
+            <div class="flex-1 relative w-full h-full flex items-center justify-center">
                 <canvas id="companyChart"></canvas>
             </div>
         </div>
     </div>
     
-    <div class="xl:col-span-9 glass-card p-8 flex flex-col">
-        <h3 class="text-xs font-black text-white uppercase tracking-widest mb-8 flex justify-between items-center">
-            <span>Individual Performance Metrics</span>
-            <span class="text-[10px] text-slate-500 font-normal">Updated in Real-time</span>
+    <div class="xl:col-span-9 glass-card p-5 flex flex-col min-h-[300px]">
+        <h3 class="text-[10px] font-black text-[#A685E2] uppercase tracking-widest mb-4 flex justify-between items-center">
+            <span>Performance Metrics</span>
         </h3>
-        <div class="flex-1 min-h-[300px]">
+        <div class="flex-1 relative">
             <canvas id="employeeChart"></canvas>
         </div>
     </div>
 </div>
 
 <!-- Main Content Tables -->
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
   <!-- Routine Matrix -->
-  <div class="xl:col-span-5 glass-card overflow-hidden flex flex-col h-[850px]">
-    <div class="p-6 bg-white/5 border-b border-white/5 flex justify-between items-center">
-        <h2 class="font-black text-emerald-400 text-sm uppercase tracking-widest flex items-center gap-3">
-            <i class="fa-solid fa-calendar-check text-xl"></i> Routine Monitoring
+  <div class="xl:col-span-5 glass-card flex flex-col h-[650px] overflow-hidden">
+    <div class="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center">
+        <h2 class="font-black text-emerald-400 text-xs uppercase tracking-widest flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check"></i> Routine Monitoring
         </h2>
-        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-black uppercase" id="routineDateLabel"></span>
+        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded font-bold uppercase" id="routineDateLabel"></span>
     </div>
-    <div id="routineContainer" class="p-6 space-y-6 overflow-y-auto flex-1">
+    <div id="routineContainer" class="p-4 space-y-4 overflow-y-auto flex-1">
         <!-- Grouped Routine Tasks -->
     </div>
   </div>
 
   <!-- Adhoc & Compliant Column -->
-  <div class="xl:col-span-7 flex flex-col gap-8 h-[850px]">
+  <div class="xl:col-span-7 flex flex-col gap-6 h-[650px]">
       <!-- Adhoc Section -->
-      <div class="glass-card overflow-hidden flex flex-col flex-1">
-        <div class="p-6 bg-white/5 border-b border-sky-500/20 flex justify-between items-center">
-            <h2 class="font-black text-sky-400 text-sm uppercase tracking-widest flex items-center gap-3">
-                <i class="fa-solid fa-bolt text-xl"></i> Adhoc Projects
+      <div class="glass-card flex flex-col flex-1 overflow-hidden">
+        <div class="p-4 bg-white/5 border-b border-sky-500/20">
+            <h2 class="font-black text-sky-400 text-xs uppercase tracking-widest flex items-center gap-2">
+                <i class="fa-solid fa-bolt"></i> Adhoc Projects
             </h2>
         </div>
-        <div class="overflow-y-auto flex-1 p-4">
-            <table class="w-full text-sm text-left">
-                <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/5 sticky top-0 bg-slate-900/90 backdrop-blur z-10">
+        <div class="overflow-y-auto flex-1 p-2">
+            <table class="w-full text-left">
+                <thead class="text-[9px] text-slate-400 uppercase tracking-widest border-b border-white/5 sticky top-0 bg-[var(--card-purple)] backdrop-blur z-10">
                     <tr>
-                        <th class="px-4 py-4">Task Name</th>
-                        <th class="px-4 py-4">Owner</th>
-                        <th class="px-4 py-4">Deadline</th>
-                        <th class="px-4 py-4 text-center">Status</th>
+                        <th class="px-3 py-3">Task Name</th>
+                        <th class="px-3 py-3 w-1/4">Owner</th>
+                        <th class="px-3 py-3 w-1/6 text-center">Deadline</th>
+                        <th class="px-3 py-3 w-1/6 text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody id="adhocTableBody" class="divide-y divide-white/5"></tbody>
@@ -196,20 +211,20 @@
       </div>
 
       <!-- Compliant Section -->
-      <div class="glass-card overflow-hidden flex flex-col flex-1">
-        <div class="p-6 bg-white/5 border-b border-rose-500/20 flex justify-between items-center">
-            <h2 class="font-black text-rose-400 text-sm uppercase tracking-widest flex items-center gap-3">
-                <i class="fa-solid fa-headset text-xl"></i> Complaints Management
+      <div class="glass-card flex flex-col flex-1 overflow-hidden">
+        <div class="p-4 bg-white/5 border-b border-rose-500/20">
+            <h2 class="font-black text-rose-400 text-xs uppercase tracking-widest flex items-center gap-2">
+                <i class="fa-solid fa-headset"></i> Complaints
             </h2>
         </div>
-        <div class="overflow-y-auto flex-1 p-4">
-            <table class="w-full text-sm text-left">
-                <thead class="text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/5 sticky top-0 bg-slate-900/90 backdrop-blur z-10">
+        <div class="overflow-y-auto flex-1 p-2">
+            <table class="w-full text-left">
+                <thead class="text-[9px] text-slate-400 uppercase tracking-widest border-b border-white/5 sticky top-0 bg-[var(--card-purple)] backdrop-blur z-10">
                     <tr>
-                        <th class="px-4 py-4">Subject</th>
-                        <th class="px-4 py-4">Assignee</th>
-                        <th class="px-4 py-4">Deadline</th>
-                        <th class="px-4 py-4 text-center">Status</th>
+                        <th class="px-3 py-3">Subject</th>
+                        <th class="px-3 py-3 w-1/4">Assignee</th>
+                        <th class="px-3 py-3 w-1/6 text-center">Deadline</th>
+                        <th class="px-3 py-3 w-1/6 text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody id="compliantTableBody" class="divide-y divide-white/5"></tbody>
@@ -220,7 +235,7 @@
 </div>
 
 <!-- Alert Box -->
-<div id="statusAlert" class="hidden z-[100] fixed top-8 left-1/2 -translate-x-1/2 w-full max-w-md p-4 rounded-2xl shadow-2xl flex items-center gap-4 border animate-bounce"></div>
+<div id="statusAlert" class="hidden z-[100] fixed top-5 left-1/2 -translate-x-1/2 w-full max-w-sm p-3 rounded-xl shadow-2xl flex items-center gap-3 border animate-bounce"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -255,22 +270,21 @@ const el = id => document.getElementById(id);
 let isInitialLoad = true;
 
 function init() {
-    // Set default date
     const todayStr = new Date().toISOString().slice(0, 10);
     appState.selectedDate = todayStr;
     el('dateFilter').value = todayStr;
 
-    // Load Local Customization
+    // Load Local Data
     const savedLogo = localStorage.getItem('ExecDash_Logo_Final');
     if(savedLogo) el('companyLogoImg').src = savedLogo;
     const savedName = localStorage.getItem('ExecDash_Name_Final');
     if(savedName) el('companyNameText').innerText = savedName;
 
-    // Firebase Real-time Listener
+    // Firebase Listener
     onSnapshot(doc(db, "dashboard", "mainData"), (docSnap) => {
         const badge = el('connectionBadge');
         badge.innerHTML = `<i class="fa-solid fa-wifi mr-1 text-emerald-400"></i> Connected`;
-        badge.className = "text-[10px] bg-emerald-500/10 px-3 py-1.5 rounded-full uppercase font-bold text-emerald-400 align-middle";
+        badge.className = "text-[9px] bg-emerald-500/10 px-2 py-1 rounded-full uppercase font-bold text-emerald-400 align-middle border border-emerald-500/20";
 
         if (docSnap.exists()) {
             const remoteData = docSnap.data();
@@ -288,16 +302,15 @@ function init() {
         }
     }, (error) => {
         const badge = el('connectionBadge');
-        badge.innerHTML = `<i class="fa-solid fa-lock mr-1"></i> Access Denied`;
-        badge.className = "text-[10px] bg-rose-500/10 px-3 py-1.5 rounded-full uppercase font-bold text-rose-400 align-middle";
-        showAlert('Cloud Connection Failed. Please check Firebase Rules.', 'rose', 'fa-triangle-exclamation');
+        badge.innerHTML = `<i class="fa-solid fa-lock mr-1"></i> Offline`;
+        badge.className = "text-[9px] bg-rose-500/10 px-2 py-1 rounded-full uppercase font-bold text-rose-400 align-middle border border-rose-500/20";
+        showAlert('Connection Failed. Please check Firebase Rules.', 'rose', 'fa-triangle-exclamation');
     });
 }
 
 function saveToCloud(showNotif = true) {
     if (showNotif) showAlert('Syncing with Cloud...', 'amber', 'fa-spinner fa-spin');
     
-    // Cleanup data for Firestore
     const cleanData = JSON.parse(JSON.stringify({ 
         tasks: appState.tasks, 
         staffMap: appState.staffMap, 
@@ -309,10 +322,10 @@ function saveToCloud(showNotif = true) {
         .catch(err => { showAlert('Sync Error: ' + err.message, 'rose', 'fa-xmark'); });
 }
 
-// Global UI Actions
+// Window functions
 window.clearDateFilter = () => { el('dateFilter').value = ''; appState.selectedDate = ''; renderUI(); };
 window.forceSync = () => saveToCloud(true);
-window.hardReset = () => { if(confirm('Erase ALL Cloud Data?')) { setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {} }); location.reload(); } };
+window.hardReset = () => { if(confirm('ต้องการล้างข้อมูลทั้งหมดในระบบคลาวด์หรือไม่?')) { setDoc(doc(db, "dashboard", "mainData"), { tasks: [], staffMap: {} }); location.reload(); } };
 window.changeTaskStatus = (id, status) => { const t = appState.tasks.find(x => x.id === id); if(t) { t.status = status; saveToCloud(false); renderUI(); } };
 window.toggleAccordion = (header) => {
     const content = header.nextElementSibling;
@@ -321,7 +334,6 @@ window.toggleAccordion = (header) => {
     icon.style.transform = content.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)";
 };
 
-// File Processing Logic
 function parseDateKey(k) {
     if (!k) return null;
     let s = String(k).trim();
@@ -343,34 +355,50 @@ function processWorkbook(wb, fileName) {
         const raw = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
         if (!raw.length) return;
 
-        // Master Data Detection
+        // 1. ตรวจจับ Master Data และดึงชื่อบริษัท
         if (sLower.includes('master') || fLower.includes('master')) {
             raw.forEach(row => {
+                // หา Company Name ในตาราง
+                row.forEach((cell, cIdx) => {
+                    if (String(cell).trim().toLowerCase() === 'company name') {
+                        const nameFound = String(row[cIdx + 1] || '').trim();
+                        if (nameFound) {
+                            el('companyNameText').innerText = nameFound;
+                            localStorage.setItem('ExecDash_Name_Final', nameFound);
+                        }
+                    }
+                });
+
+                // อ่านพนักงาน
                 const code = String(row[0] || '').trim();
                 const name = String(row[1] || '').trim();
-                if (code.startsWith('ST')) {
+                if (code.startsWith('ST') || code.startsWith('EMP')) {
                     staff[code] = name ? `${code} (${name})` : code;
                     if(name) staff[name] = `${code} (${name})`;
                 }
-                // Company Name detection
-                row.forEach((cell, idx) => { if(String(cell).toLowerCase().includes('company name')) el('companyNameText').innerText = String(row[idx+1] || '').trim(); });
             });
             return;
         }
 
-        // Detect Categorization
+        // 2. จัดหมวดหมู่ Sheet (Routine / Adhoc / Compliant)
         let category = 'Adhoc';
-        if (sLower.includes('group') || sLower.includes('monitoring') || sLower.includes('routine')) category = 'Routine';
-        else if (sLower.includes('compliant') || sLower.includes('ร้องเรียน')) category = 'Compliant';
+        // ตรวจจับคำว่า Group, Monitoring, Routine
+        if (sLower.includes('group') || sLower.includes('monitoring') || sLower.includes('routine')) {
+            category = 'Routine';
+        } else if (sLower.includes('compliant') || sLower.includes('ร้องเรียน')) {
+            category = 'Compliant';
+        }
 
         const jsonRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
         if (!jsonRows.length) return;
 
         const headers = Object.keys(jsonRows[0]);
-        const findKey = (arr) => headers.find(h => arr.some(a => h.toLowerCase().replace(/\s/g, '').includes(a)));
+        // ฟังก์ชันช่วยหา Column แบบฉลาด 
+        const findKey = (arr) => headers.find(h => arr.some(a => String(h).toLowerCase().replace(/\s/g, '').includes(a)));
 
         const taskKey = findKey(['task', 'ชื่องาน', 'jobname']);
-        const ownerKey = findKey(['owner', 'onwer', 'พนักงาน', 'staff']); // Fixes "Onwer" typo
+        // 3. รองรับพิมพ์ผิด Onwer -> Owner
+        const ownerKey = findKey(['owner', 'onwer', 'พนักงาน', 'staff']); 
         const deadlineKey = findKey(['deadline', 'กำหนดส่ง', 'date']);
         const statusKey = findKey(['status', 'สถานะ']);
 
@@ -385,15 +413,15 @@ function processWorkbook(wb, fileName) {
             const jobType = sLower.includes('sheet') ? fileName.split('.')[0] : sheetName;
 
             if (category === 'Routine') {
-                // Matrix Parsing
+                // แบบ Matrix ตารางวันที่
                 headers.forEach(h => {
                     const dKey = parseDateKey(h);
                     if (dKey) {
                         const val = String(row[h]).trim().toUpperCase();
                         if (val) {
                             let status = 'not run';
-                            if (val === 'S') status = 'done';
-                            else if (val === 'P') status = 'pending';
+                            if (val === 'S' || val === 'SUCCESS') status = 'done';
+                            else if (val === 'P' || val === 'PENDING') status = 'pending';
                             
                             parsed.push({
                                 id: `R-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
@@ -403,7 +431,7 @@ function processWorkbook(wb, fileName) {
                     }
                 });
             } else {
-                // List Parsing
+                // แบบ List ธรรมดา
                 const dKey = deadlineKey ? parseDateKey(row[deadlineKey]) : '';
                 const sVal = statusKey ? String(row[statusKey]).toUpperCase() : '';
                 let status = 'not run';
@@ -433,20 +461,22 @@ el('fileUpload').onchange = async (e) => {
         allNewTasks = [...allNewTasks, ...processWorkbook(wb, f.name)];
     }
 
-    // Merge & Dedup
+    // Merge ไม่ให้ข้อมูลซ้ำ
     const existingMap = new Map(appState.tasks.map(t => [`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t]));
     allNewTasks.forEach(t => existingMap.set(`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t));
     appState.tasks = Array.from(existingMap.values());
 
+    updateDropdowns();
+    renderUI();
     saveToCloud(true);
     e.target.value = '';
 };
 
 function updateDropdowns() {
     const emps = [...new Set(appState.tasks.map(t => t.ownerName))].sort();
-    el('employeeSelect').innerHTML = '<option value="all">Everyone</option>' + emps.map(n => `<option value="${n}">${n}</option>`).join('');
+    el('employeeSelect').innerHTML = '<option value="all">ทุกคน (All)</option>' + emps.map(n => `<option value="${n}">${n}</option>`).join('');
     const types = [...new Set(appState.tasks.map(t => t.jobType))].sort();
-    el('jobTypeSelect').innerHTML = '<option value="all">All Groups</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+    el('jobTypeSelect').innerHTML = '<option value="all">ทุกกลุ่มงาน (All)</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
 }
 
 function renderUI() {
@@ -460,7 +490,6 @@ function renderUI() {
         return matchEmp && matchJob && matchDate;
     });
 
-    // Stats
     let s=0, p=0, n=0;
     filtered.forEach(t => { if(t.status==='done') s++; else if(t.status==='pending') p++; else n++; });
     el('successStat').innerText = s; el('pendingStat').innerText = p; el('notrunStat').innerText = n;
@@ -470,26 +499,24 @@ function renderUI() {
     el('percentStat').innerText = routines.length ? `${Math.round((rDone/routines.length)*100)}%` : '0%';
     el('routineDateLabel').innerText = target ? `Date: ${target}` : 'Overview: All Dates';
 
-    // Lists
     const adhoc = filtered.filter(t => t.category === 'Adhoc');
     const comp = filtered.filter(t => t.category === 'Compliant');
     el('adhocTableBody').innerHTML = renderRows(adhoc);
     el('compliantTableBody').innerHTML = renderRows(comp);
 
-    // Routine Matrix
     renderRoutineMatrix(routines);
     renderCharts(filtered);
 }
 
 function renderRows(tasks) {
-    if(!tasks.length) return '<tr><td colspan="4" class="py-12 text-center text-slate-600 font-bold uppercase tracking-widest text-[10px]">No Records Found</td></tr>';
+    if(!tasks.length) return '<tr><td colspan="4" class="py-10 text-center text-slate-500 font-bold uppercase tracking-widest text-[9px]">ไม่มีข้อมูล</td></tr>';
     return tasks.map(t => `
-        <tr class="hover:bg-white/5 transition-colors">
-            <td class="px-4 py-4"><div class="text-xs font-bold ${t.status==='done'?'text-slate-500 line-through':'text-white'} truncate w-48">${t.taskName}</div></td>
-            <td class="px-4 py-4 text-[10px] text-indigo-400 font-black">${t.ownerName}</td>
-            <td class="px-4 py-4 text-[10px] text-slate-500 font-mono">${t.date || '-'}</td>
-            <td class="px-4 py-4 text-center">
-                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-slate-900 border ${t.status==='done'?'border-emerald-500/50 text-emerald-400':'border-white/10 text-slate-400'} text-[10px] rounded-lg py-1 pl-2 pr-6 outline-none font-black">
+        <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
+            <td class="px-3 py-3"><div class="text-[11px] font-bold ${t.status==='done'?'text-slate-500 line-through':'text-slate-200'} truncate w-40" title="${t.taskName}">${t.taskName}</div></td>
+            <td class="px-3 py-3 text-[10px] text-[#A685E2] font-black truncate w-24">${t.ownerName}</td>
+            <td class="px-3 py-3 text-[10px] text-slate-400 font-mono text-center">${t.date || '-'}</td>
+            <td class="px-3 py-3 text-center">
+                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/40 border ${t.status==='done'?'border-emerald-500/50 text-emerald-400':'border-white/10 text-slate-400'} text-[10px] rounded py-1 pl-2 pr-6 outline-none font-bold">
                     <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
                     <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
                     <option value="done" ${t.status==='done'?'selected':''}>S</option>
@@ -502,7 +529,7 @@ function renderRows(tasks) {
 function renderRoutineMatrix(tasks) {
     const cont = el('routineContainer');
     if(!tasks.length) {
-        cont.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-700"><i class="fa-regular fa-folder-open text-4xl mb-4"></i><p class="text-[10px] font-black uppercase">Select a date to view routines</p></div>`;
+        cont.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-500"><i class="fa-regular fa-folder-open text-3xl mb-3"></i><p class="text-[9px] font-black uppercase">เลือกวันที่เพื่อดูงาน Routine</p></div>`;
         return;
     }
     
@@ -514,27 +541,27 @@ function renderRoutineMatrix(tasks) {
         const done = g.filter(x => x.status === 'done').length;
         const pct = Math.round((done / g.length) * 100);
         return `
-        <div class="bg-slate-900/40 rounded-2xl border border-white/5 overflow-hidden shadow-xl">
-            <div class="p-5 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors" onclick="toggleAccordion(this)">
+        <div class="bg-black/20 rounded-xl border border-white/5 overflow-hidden shadow-lg">
+            <div class="p-4 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors" onclick="toggleAccordion(this)">
                 <div class="flex-1">
-                    <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">${name}</h4>
-                    <div class="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
+                    <h4 class="text-[10px] font-black text-[#A685E2] uppercase tracking-widest mb-2">${name}</h4>
+                    <div class="w-full bg-black/50 h-1.5 rounded-full overflow-hidden">
                         <div class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct}%"></div>
                     </div>
                 </div>
-                <div class="ml-6 text-right">
-                    <span class="text-lg font-black text-white block">${pct}%</span>
-                    <i class="fa-solid fa-chevron-down text-slate-600 text-[10px] transition-transform"></i>
+                <div class="ml-4 text-right">
+                    <span class="text-sm font-black text-white block">${pct}%</span>
+                    <i class="fa-solid fa-chevron-down text-slate-500 text-[9px] transition-transform"></i>
                 </div>
             </div>
-            <div class="p-2 space-y-1">
+            <div class="p-1 space-y-0.5 border-t border-white/5">
                 ${g.map(t => `
-                    <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group">
-                        <div class="flex-1 min-w-0 pr-4">
-                            <p class="text-[11px] font-bold ${t.status==='done'?'text-slate-600 line-through':'text-slate-200'} truncate">${t.taskName}</p>
-                            <span class="text-[9px] text-slate-500 font-black uppercase">${t.ownerName}</span>
+                    <div class="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors group">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <p class="text-[11px] font-bold ${t.status==='done'?'text-slate-600 line-through':'text-slate-200'} truncate" title="${t.taskName}">${t.taskName}</p>
+                            <span class="text-[9px] text-[#A685E2] font-bold uppercase">${t.ownerName}</span>
                         </div>
-                        <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-slate-900/80 border ${t.status==='done'?'border-emerald-500/30 text-emerald-400':'border-white/5 text-slate-500'} text-[9px] rounded-lg py-1 pl-2 pr-6 outline-none font-black">
+                        <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/60 border ${t.status==='done'?'border-emerald-500/30 text-emerald-400':'border-white/5 text-slate-500'} text-[9px] rounded py-1 pl-2 pr-6 outline-none font-bold">
                             <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
                             <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
                             <option value="done" ${t.status==='done'?'selected':''}>S</option>
@@ -557,7 +584,7 @@ function renderCharts(tasks) {
         type: 'doughnut',
         data: {
             labels: ['Success', 'Pending', 'Not Run'],
-            datasets: [{ data: [done, pend, notr], backgroundColor: ['#10b981', '#f59e0b', '#334155'], borderWidth: 0, hoverOffset: 15 }]
+            datasets: [{ data: [done, pend, notr], backgroundColor: ['#34d399', '#fbbf24', '#64748b'], borderWidth: 0 }]
         },
         options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false } } }
     });
@@ -577,23 +604,23 @@ function renderCharts(tasks) {
         data: {
             labels,
             datasets: [
-                { label: 'S', data: labels.map(l => empStats[l].s), backgroundColor: '#10b981', borderRadius: 6 },
-                { label: 'P', data: labels.map(l => empStats[l].p), backgroundColor: '#f59e0b', borderRadius: 6 },
-                { label: 'N', data: labels.map(l => empStats[l].n), backgroundColor: '#334155', borderRadius: 6 }
+                { label: 'S', data: labels.map(l => empStats[l].s), backgroundColor: '#34d399', borderRadius: 4 },
+                { label: 'P', data: labels.map(l => empStats[l].p), backgroundColor: '#fbbf24', borderRadius: 4 },
+                { label: 'N', data: labels.map(l => empStats[l].n), backgroundColor: '#64748b', borderRadius: 4 }
             ]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' } } },
-            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, font: { weight: 'bold', size: 10 } } } }
+            scales: { x: { stacked: true, grid: { display: false }, ticks:{font:{size:9}} }, y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks:{font:{size:9}} } },
+            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, font: { size: 9 } } } }
         }
     });
 }
 
 function showAlert(msg, color, icon) {
     const a = el('statusAlert');
-    a.className = `z-[100] fixed top-8 left-1/2 -translate-x-1/2 w-full max-w-md p-5 rounded-2xl shadow-2xl flex items-center gap-4 bg-${color}-500/90 text-white border-${color}-400/50 backdrop-blur-xl animate-bounce`;
-    a.innerHTML = `<i class="fa-solid ${icon} text-2xl"></i> <div class="font-black text-sm uppercase tracking-widest">${msg}</div>`;
+    a.className = `z-[100] fixed top-5 left-1/2 -translate-x-1/2 w-full max-w-sm p-3 rounded-xl shadow-2xl flex items-center gap-3 bg-${color}-500/90 text-white border border-${color}-400/50 backdrop-blur-md animate-bounce`;
+    a.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> <div class="font-bold text-xs uppercase tracking-widest">${msg}</div>`;
     a.classList.remove('hidden');
     setTimeout(() => a.classList.add('hidden'), 3500);
 }
@@ -615,4 +642,5 @@ init();
 </script>
 </body>
 </html>
+
 
