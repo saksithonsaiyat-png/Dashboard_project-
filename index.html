@@ -332,35 +332,57 @@ window.changeTaskStatus = (id, status) => { const t = appState.tasks.find(x => x
 
 function cleanKey(s) { return String(s).replace(/\s/g, '').toLowerCase(); }
 
+// 📌 ฟังก์ชันอ่านวันที่ขั้นเทพ (แก้บั๊กการอ่านไฟล์แครช)
 function parseDateKey(k) {
     if (!k) return null;
     let s = String(k).trim();
-    if (s.match(/^\d{4}-\d{2}-\d{2}$/)) return s;
+    
+    // YYYY-MM-DD
+    let m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+    if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+    
+    // DD/MM/YYYY หรือ MM/DD/YYYY
+    m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if (m) {
+        let yy = parseInt(m[3], 10);
+        if (yy < 100) yy += 2000;
+        let p1 = parseInt(m[1], 10), p2 = parseInt(m[2], 10);
+        let mm = p2, dd = p1; 
+        if (p1 > 12) { mm = p1; dd = p2; }
+        return `${yy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    }
+
+    // Excel Serial Date
     const n = parseFloat(s);
-    if (!isNaN(n) && n > 30000 && n < 60000 && !s.includes(/[a-zA-Z]/)) {
-        return new Date(Math.round((n - 25569) * 86400 * 1000)).toISOString().slice(0, 10);
+    // เปลี่ยนจาก .includes เป็น .test เพื่อแก้บั๊ก TypeError ที่ทำให้เว็บค้างตอนอ่านไฟล์ลูกค้า
+    if (!isNaN(n) && n > 30000 && n < 70000 && !/[a-zA-Z]/.test(s)) {
+        // ใช้เวลาเที่ยงวันป้องกันปัญหา Timezone เปลี่ยนวัน
+        const d = new Date(Math.round((n - 25569) * 86400 * 1000) + (12 * 60 * 60 * 1000));
+        return d.toISOString().slice(0, 10);
     }
     return null;
 }
 
-// 📌 ฟังก์ชันอ่านข้อมูลแบบยืดหยุ่น (แก้ปัญหาการหาคอลัมน์ไม่เจอ)
+// 📌 ฟังก์ชันอ่านข้อมูลแบบยืดหยุ่น (ค้นหาคำใกล้เคียง)
 function findColumnKey(row, possibleKeys) {
     const keys = Object.keys(row);
     for (let k of keys) {
         const cleanK = cleanKey(k);
         if (possibleKeys.some(pk => cleanK.includes(pk))) {
-            return k; // คืนค่า Key จริงที่อยู่ในข้อมูล (เพื่อดึงข้อมูล)
+            return k; 
         }
     }
     return null;
 }
 
-// 📌 Smart Parser: ไม่สนใจชื่อไฟล์ เน้นดูเนื้อหา
+// 📌 Smart Parser: วิเคราะห์จากไฟล์ลูกค้าของจริง
 function processWorkbook(wb, fileName) {
     let parsed = [];
 
     wb.SheetNames.forEach(sheetName => {
-        // อ่านข้อมูลแบบ 2 มิติ (หา Master Data)
+        const sLower = sheetName.toLowerCase();
+
+        // ค้นหา Master Data
         const rawMatrix = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
         let isMaster = false;
 
@@ -377,47 +399,50 @@ function processWorkbook(wb, fileName) {
             });
         });
 
-        if (isMaster) return; // ถ้าเป็น Master Data จบการทำงานชีตนี้
+        if (isMaster) return; 
 
-        // อ่านข้อมูลแบบออบเจกต์
-        const jsonRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+        // อ่านข้อมูล (ใช้ raw: false เพื่อดึงค่าที่ format แล้ว ป้องกันปัญหาตัวเลขเพี้ยน)
+        const jsonRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '', raw: false });
         if (!jsonRows.length) return;
 
-        // วิเคราะห์ว่าเป็นข้อมูลประเภทใดจากแถวแรก
         const firstRow = jsonRows[0];
         
-        const taskCol = findColumnKey(firstRow, ['task', 'jobname', 'ชื่องาน']);
-        const ownerCol = findColumnKey(firstRow, ['owner', 'onwer', 'พนักงาน']);
+        // รองรับคำว่า 'task' หรือ 'ชื่องาน' หรือ 'job name'
+        const taskCol = findColumnKey(firstRow, ['task', 'jobname', 'ชื่องาน', 'รายการ']);
+        // รองรับคำว่า 'owner' หรือ 'onwer' (พิมพ์ผิด)
+        const ownerCol = findColumnKey(firstRow, ['owner', 'onwer', 'พนักงาน', 'ผู้รับผิดชอบ']);
         
-        if (!taskCol) return; // ถ้าไม่มีชื่องาน ถือว่าไม่ใช่ตารางที่ต้องการ
+        if (!taskCol) return;
 
         const dateCols = Object.keys(firstRow).filter(k => parseDateKey(k));
         const deadlineCol = findColumnKey(firstRow, ['deadline', 'กำหนดส่ง', 'date']);
         
-        // ถ้ามีคอลัมน์ที่เป็นวันที่(YYYY-MM-DD) เรียงกันหลายๆคอลัมน์ = Routine
-        const isRoutine = dateCols.length >= 2; 
+        // แยกว่าเป็นตาราง Matrix (Routine) หรือ List ธรรมดา
+        const isRoutine = dateCols.length >= 2 || sLower.includes('routine') || sLower.includes('monitoring'); 
 
         jsonRows.forEach(row => {
             const taskName = String(row[taskCol]).trim();
-            if (!taskName || taskName === 'ไม่ระบุ') return;
+            if (!taskName || taskName === 'ไม่ระบุ' || taskName.toLowerCase() === 'task') return;
 
             const ownerName = ownerCol ? String(row[ownerCol]).trim() : 'ไม่ระบุ';
 
-            if (isRoutine) {
-                // *** ดึงข้อมูล Routine ***
+            if (isRoutine && dateCols.length > 0) {
+                // *** ดึงข้อมูล Routine (Matrix) ***
+                let jobType = sLower.includes('group a') ? 'Group A' : (sLower.includes('group b') ? 'Group B' : sheetName);
+                
                 dateCols.forEach(dCol => {
                     const dKey = parseDateKey(dCol);
                     const val = String(row[dCol]).trim().toUpperCase();
 
                     if (val && ['S','P','N','SUCCESS','PENDING'].some(v => val.includes(v))) {
                         let status = 'not run';
-                        if (val === 'S' || val.includes('SUCCESS')) status = 'done';
+                        if (val === 'S' || val.includes('SUCCESS') || val.includes('DONE')) status = 'done';
                         else if (val === 'P' || val.includes('PENDING')) status = 'pending';
                         
                         parsed.push({
                             id: `R-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
                             category: 'Routine', 
-                            jobType: 'Routine Monitoring', 
+                            jobType: jobType, 
                             taskName: taskName, 
                             ownerName: ownerName, 
                             date: dKey, 
@@ -428,24 +453,24 @@ function processWorkbook(wb, fileName) {
 
             } else {
                 // *** ดึงข้อมูล Adhoc / Compliant ***
-                const catCol = findColumnKey(firstRow, ['category', 'หมวดหมู่']);
+                const catCol = findColumnKey(firstRow, ['category', 'หมวดหมู่', 'ประเภท']);
                 const statusCol = findColumnKey(firstRow, ['status', 'สถานะ']);
 
                 const catVal = catCol ? String(row[catCol]).trim() : '';
                 const dateVal = deadlineCol ? String(row[deadlineCol]).trim() : '';
                 const statusVal = statusCol ? String(row[statusCol]).trim().toUpperCase() : '';
 
-                // วิเคราะห์ว่าเป็น Compliant หรือไม่ (ดูจากชื่อไฟล์ หรือ หมวดหมู่)
-                let isCompliant = fileName.toLowerCase().includes('compliant') || catVal.includes('ร้องเรียน');
+                // วิเคราะห์ว่าเป็น Compliant หรือไม่ (ดูจากชื่อชีต หรือ ชื่อไฟล์ หรือหมวดหมู่)
+                let isCompliant = fileName.toLowerCase().includes('compliant') || sLower.includes('compliant') || catVal.includes('ร้องเรียน');
                 let mainCategory = isCompliant ? 'Compliant' : 'Adhoc';
 
-                let jobType = catVal || 'None';
-                if (mainCategory === 'Compliant' && jobType === 'None') jobType = 'Compliant Management';
+                let jobType = catVal || sheetName;
+                if (mainCategory === 'Compliant' && (!catVal || catVal === 'None')) jobType = 'ร้องเรียน';
 
                 const dKey = parseDateKey(dateVal) || '';
                 
                 let status = 'not run';
-                if (statusVal.includes('SUCCESS') || statusVal === 'S') status = 'done';
+                if (statusVal.includes('SUCCESS') || statusVal === 'S' || statusVal.includes('DONE')) status = 'done';
                 else if (statusVal.includes('PENDING') || statusVal === 'P' || statusVal.includes('OVERDUE')) status = 'pending';
 
                 parsed.push({
@@ -468,27 +493,34 @@ el('fileUpload').onchange = async (e) => {
     const files = e.target.files;
     if (!files.length) return;
     
-    let allNewTasks = [];
-    for(let f of files) {
-        const buf = await f.arrayBuffer();
-        const wb = XLSX.read(buf, { type: 'array' });
-        // บังคับให้ชื่อชีตของ CSV เป็นชื่อไฟล์ เพื่อการแยกแยะ (ถ้าจำเป็น)
-        if (wb.SheetNames.length === 1 && f.name.toLowerCase().endsWith('.csv')) {
-            wb.SheetNames[0] = f.name;
+    showAlert('Processing files...', 'sky', 'fa-spinner fa-spin');
+    
+    try {
+        let allNewTasks = [];
+        for(let f of files) {
+            const buf = await f.arrayBuffer();
+            const wb = XLSX.read(buf, { type: 'array' });
+            if (wb.SheetNames.length === 1 && f.name.toLowerCase().endsWith('.csv')) {
+                wb.SheetNames[0] = f.name;
+            }
+            allNewTasks = [...allNewTasks, ...processWorkbook(wb, f.name)];
         }
-        allNewTasks = [...allNewTasks, ...processWorkbook(wb, f.name)];
+
+        const existingMap = new Map(appState.tasks.map(t => [`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t]));
+        allNewTasks.forEach(t => existingMap.set(`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t));
+        appState.tasks = Array.from(existingMap.values());
+
+        // ให้เว็บไม่ล็อควันที่เมื่ออัปโหลดใหม่ เพื่อให้เห็นงานทั้งหมดทันที
+        appState.selectedDate = '';
+        el('dateFilter').value = '';
+
+        updateDropdowns();
+        renderUI();
+        saveToCloud(true);
+    } catch (err) {
+        console.error(err);
+        showAlert('Error processing file', 'rose', 'fa-triangle-exclamation');
     }
-
-    const existingMap = new Map(appState.tasks.map(t => [`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t]));
-    allNewTasks.forEach(t => existingMap.set(`${t.taskName}-${t.ownerName}-${t.date}-${t.jobType}`, t));
-    appState.tasks = Array.from(existingMap.values());
-
-    appState.selectedDate = '';
-    el('dateFilter').value = '';
-
-    updateDropdowns();
-    renderUI();
-    saveToCloud(true);
     e.target.value = '';
 };
 
@@ -531,7 +563,7 @@ function renderUI() {
     const filtered = appState.tasks.filter(t => {
         const matchEmp = employee === 'all' || t.ownerName === employee;
         const matchJob = jobType === 'all' || t.jobType === jobType;
-        const matchDate = !target || t.date === target || t.category !== 'Routine'; 
+        const matchDate = !target || t.date === target; // เปลี่ยนกลับมาให้กรองทั้ง Adhoc และ Routine ตามวันที่
         
         return matchEmp && matchJob && matchDate;
     });
