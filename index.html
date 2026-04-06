@@ -173,49 +173,46 @@
     </div>
 </div>
 
-<!-- Unified Master Box (One Container for All Data) -->
-<div class="glass-card overflow-hidden">
-    <div class="p-6 bg-white/5 border-b border-white/10 flex justify-between items-center shadow-sm">
-        <h2 class="font-black text-white text-lg tracking-widest uppercase flex items-center gap-2">
-            <i class="fa-solid fa-layer-group text-[#b490ff]"></i> Task Monitor Console
+<!-- Main Content Tables -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+  
+  <!-- กล่องรวม Routine & Adhoc (ฝั่งซ้าย) -->
+  <div class="xl:col-span-7 glass-card flex flex-col h-[750px] overflow-hidden">
+    <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center shadow-sm z-10">
+        <h2 class="font-black text-white text-sm uppercase tracking-widest flex items-center gap-2">
+            <i class="fa-solid fa-layer-group text-[#b490ff] text-lg"></i> Routine & Adhoc
         </h2>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded font-bold uppercase" id="routineDateLabel"></span>
     </div>
     
-    <div class="p-6 md:p-8 space-y-12">
+    <div class="overflow-y-auto flex-1 p-5 space-y-8 bg-black/10">
         
-        <!-- Routine Section (Top) -->
+        <!-- โซน Routine -->
         <section>
-            <div class="flex items-center gap-3 mb-6 border-b border-emerald-500/30 pb-3">
-                <div class="bg-emerald-500/20 p-2 rounded-lg"><i class="fa-solid fa-calendar-check text-emerald-400 text-xl"></i></div>
-                <div>
-                    <h3 class="font-black text-emerald-400 text-base uppercase tracking-widest">Routine Monitoring</h3>
-                    <p class="text-[10px] text-slate-400 mt-0.5">งานประจำที่มีการอัปเดตสถานะเป็นรายวัน</p>
-                </div>
-                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-bold ml-auto shadow-sm uppercase tracking-wider border border-emerald-500/30" id="routineDateLabel"></span>
+            <div class="flex items-center gap-2 mb-4 border-b border-emerald-500/30 pb-2">
+                <i class="fa-solid fa-calendar-check text-emerald-400"></i>
+                <h3 class="font-black text-emerald-400 text-xs uppercase tracking-widest">Routine Monitoring</h3>
             </div>
-            <div id="routineContainer" class="space-y-4">
-                <!-- Grouped Routine Tasks -->
+            <div id="routineContainer" class="space-y-3">
+                <!-- Grouped Routine Tasks จะถูกนำมาใส่ตรงนี้ -->
             </div>
         </section>
 
-        <!-- Adhoc Section (Middle) -->
+        <!-- โซน Adhoc -->
         <section>
-            <div class="flex items-center gap-3 mb-6 border-b border-sky-500/30 pb-3">
-                <div class="bg-sky-500/20 p-2 rounded-lg"><i class="fa-solid fa-bolt text-sky-400 text-xl"></i></div>
-                <div>
-                    <h3 class="font-black text-sky-400 text-base uppercase tracking-widest">Adhoc Projects</h3>
-                    <p class="text-[10px] text-slate-400 mt-0.5">งานเฉพาะกิจ หรือโปรเจกต์ที่ได้รับมอบหมาย</p>
-                </div>
+            <div class="flex items-center gap-2 mb-4 border-b border-sky-500/30 pb-2">
+                <i class="fa-solid fa-bolt text-sky-400"></i>
+                <h3 class="font-black text-sky-400 text-xs uppercase tracking-widest">Adhoc Projects</h3>
             </div>
-            <div class="overflow-x-auto bg-slate-900/40 rounded-xl border border-white/5 shadow-inner">
+            <div class="bg-slate-900/40 rounded-xl border border-white/5 shadow-inner overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="text-[10px] text-slate-300 uppercase tracking-widest border-b border-white/10 bg-white/5">
                         <tr>
-                            <th class="px-5 py-4">Task Name</th>
-                            <th class="px-5 py-4 w-1/4">Category</th>
-                            <th class="px-5 py-4 w-1/5">Owner</th>
-                            <th class="px-5 py-4 w-1/6 text-center">Deadline</th>
-                            <th class="px-5 py-4 w-1/6 text-center">Status</th>
+                            <th class="px-4 py-3">Task Name</th>
+                            <th class="px-4 py-3 w-1/4">Category</th>
+                            <th class="px-4 py-3 w-1/5">Owner</th>
+                            <th class="px-4 py-3 w-1/6 text-center">Deadline</th>
+                            <th class="px-4 py-3 w-1/6 text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody id="adhocTableBody" class="divide-y divide-white/5 text-sm"></tbody>
@@ -223,32 +220,30 @@
             </div>
         </section>
 
-        <!-- Compliant Section (Bottom) -->
-        <section>
-            <div class="flex items-center gap-3 mb-6 border-b border-rose-500/30 pb-3">
-                <div class="bg-rose-500/20 p-2 rounded-lg"><i class="fa-solid fa-headset text-rose-400 text-xl"></i></div>
-                <div>
-                    <h3 class="font-black text-rose-400 text-base uppercase tracking-widest">Complaints Management</h3>
-                    <p class="text-[10px] text-slate-400 mt-0.5">ระบบจัดการเคสร้องเรียนและข้อผิดพลาด</p>
-                </div>
-            </div>
-            <div class="overflow-x-auto bg-slate-900/40 rounded-xl border border-white/5 shadow-inner">
-                <table class="w-full text-left">
-                    <thead class="text-[10px] text-slate-300 uppercase tracking-widest border-b border-white/10 bg-white/5">
-                        <tr>
-                            <th class="px-5 py-4">Subject</th>
-                            <th class="px-5 py-4 w-1/4">Category</th>
-                            <th class="px-5 py-4 w-1/5">Assignee</th>
-                            <th class="px-5 py-4 w-1/6 text-center">Deadline</th>
-                            <th class="px-5 py-4 w-1/6 text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="compliantTableBody" class="divide-y divide-white/5 text-sm"></tbody>
-                </table>
-            </div>
-        </section>
-
     </div>
+  </div>
+
+  <!-- กล่อง Compliant (ฝั่งขวา) -->
+  <div class="xl:col-span-5 glass-card flex flex-col h-[750px] overflow-hidden">
+    <div class="p-4 bg-white/5 border-b border-rose-500/30 shadow-sm z-10">
+        <h2 class="font-black text-rose-400 text-sm uppercase tracking-widest flex items-center gap-2">
+            <i class="fa-solid fa-headset text-lg"></i> Complaints
+        </h2>
+    </div>
+    <div class="overflow-y-auto flex-1 p-2 bg-black/10">
+        <table class="w-full text-left">
+            <thead class="text-[10px] text-slate-300 uppercase tracking-widest border-b border-white/10 sticky top-0 bg-[var(--card-purple)] backdrop-blur-xl z-10 shadow-sm">
+                <tr>
+                    <th class="px-4 py-3">Subject</th>
+                    <th class="px-4 py-3 w-1/4">Assignee</th>
+                    <th class="px-4 py-3 w-1/5 text-center">Deadline</th>
+                    <th class="px-4 py-3 w-1/5 text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody id="compliantTableBody" class="divide-y divide-white/5 text-sm"></tbody>
+        </table>
+    </div>
+  </div>
 </div>
 
 <!-- Alert Box -->
@@ -286,13 +281,14 @@ Chart.defaults.font.family = "'Anuphan', sans-serif";
 
 const el = id => document.getElementById(id);
 let isInitialLoad = true;
+let companyNameTimeout; // สำหรับหน่วงเวลาอัปเดตแบบเรียลไทม์
 
 function init() {
     const todayStr = new Date().toISOString().slice(0, 10);
     appState.selectedDate = todayStr;
     el('dateFilter').value = todayStr;
 
-    const savedLogo = localStorage.getItem('ExecDash_Logo_Final_v5');
+    const savedLogo = localStorage.getItem('ExecDash_Logo_Final_v6');
     if(savedLogo) el('companyLogoImg').src = savedLogo;
 
     // Firebase Listener
@@ -306,7 +302,7 @@ function init() {
             appState.tasks = remoteData.tasks || [];
             appState.staffMap = remoteData.staffMap || {};
             
-            // Sync Company Name
+            // Sync ชื่อบริษัท Real-time
             if (remoteData.companyName && document.activeElement !== el('companyNameText')) {
                 appState.companyName = remoteData.companyName;
                 el('companyNameText').innerText = appState.companyName;
@@ -328,10 +324,13 @@ function init() {
         showAlert('Connection Failed.', 'rose', 'fa-triangle-exclamation');
     });
 
-    // Handle manual company name edit
-    el('companyNameText').addEventListener('blur', (e) => {
+    // ตรวจจับตอนพิมพ์แก้ชื่อบริษัท (ให้เซฟขึ้นคลาวด์อัตโนมัติ)
+    el('companyNameText').addEventListener('input', (e) => {
         appState.companyName = e.target.innerText;
-        saveToCloud(false);
+        clearTimeout(companyNameTimeout);
+        companyNameTimeout = setTimeout(() => {
+            saveToCloud(false);
+        }, 1000); // พิมพ์เสร็จรอ 1 วิ แล้วยิงขึ้นคลาวด์
     });
 }
 
@@ -361,28 +360,16 @@ window.toggleAccordion = (header) => {
     icon.style.transform = content.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)";
 };
 
-// --- DATA PARSERS ---
-
-// แปลงรูปแบบวันที่ให้เป็นมาตรฐาน
-function normalizeDate(val) {
-    if (!val) return null;
-    let s = String(val).trim();
-    // ถ้ามาเป็น YYYY-MM-DD แล้ว
-    if (s.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
-        const p = s.split('-');
-        return `${p[0]}-${p[1].padStart(2, '0')}-${p[2].padStart(2, '0')}`;
-    }
-    // ถ้ามาเป็นตัวเลข Excel Serial (เช่น 45000)
-    let n = parseFloat(s);
-    if (!isNaN(n) && n > 30000 && n < 70000 && !s.includes(/[a-zA-Z]/)) {
+// Data Parsers
+function parseDateKey(k) {
+    if (!k) return null;
+    let s = String(k).trim();
+    if (s.match(/^\d{4}-\d{2}-\d{2}$/)) return s;
+    const n = parseFloat(s);
+    if (!isNaN(n) && n > 30000 && n < 60000 && !s.includes(/[a-zA-Z]/)) {
         return new Date(Math.round((n - 25569) * 86400 * 1000)).toISOString().slice(0, 10);
     }
-    // ลองใช้ JS Date
-    let d = new Date(s);
-    if (!isNaN(d.getTime())) {
-        return d.toISOString().slice(0, 10);
-    }
-    return s;
+    return null;
 }
 
 function cleanKey(s) { return String(s).replace(/\s/g, '').toLowerCase(); }
@@ -394,22 +381,23 @@ function processWorkbook(wb, fileName) {
 
     wb.SheetNames.forEach(sheetName => {
         const sLower = sheetName.toLowerCase().replace(/\s/g, '');
-        const sMatch = sLower + fLower; // ชื่อชีต + ชื่อไฟล์
+        const sMatch = sLower + fLower; 
         
-        // 1. MASTER DATA: ดึงชื่อบริษัทและพนักงาน
+        // 1. MASTER DATA
         if (sMatch.includes('master')) {
             const raw = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
-            raw.forEach(row => {
-                row.forEach((cell, cIdx) => {
-                    if (String(cell).trim().toLowerCase() === 'company name') {
-                        const nameFound = String(row[cIdx + 1] || '').trim();
-                        if (nameFound) {
-                            appState.companyName = nameFound;
-                            el('companyNameText').innerText = nameFound;
-                        }
+            for(let r=0; r<raw.length; r++) {
+                const row = raw[r];
+                if(!row) continue;
+                
+                // หาชื่อบริษัท (ตรวจจับแนวนอน)
+                for(let c=0; c<row.length; c++) {
+                    if(String(row[c]).trim().toLowerCase() === 'company name' && row[c+1]) {
+                        appState.companyName = String(row[c+1]).trim();
+                        el('companyNameText').innerText = appState.companyName;
                     }
-                });
-
+                }
+                // หาพนักงาน
                 const code = String(row[0] || '').trim();
                 const name = String(row[1] || '').trim();
                 if (code.toUpperCase().startsWith('ST') || code.toUpperCase().startsWith('EMP')) {
@@ -417,11 +405,10 @@ function processWorkbook(wb, fileName) {
                     staff[cleanKey(code)] = fullName;
                     if(name) staff[cleanKey(name)] = fullName;
                 }
-            });
+            }
             return;
         }
 
-        // อ่านข้อมูลแถว
         const jsonRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
         if (!jsonRows.length) return;
 
@@ -429,20 +416,18 @@ function processWorkbook(wb, fileName) {
         const findKey = (arr) => headers.find(h => arr.some(a => String(h).toLowerCase().replace(/\s/g, '').includes(a)));
 
         const taskKey = findKey(['task', 'ชื่องาน', 'jobname']);
-        const ownerKey = findKey(['owner', 'onwer', 'พนักงาน']); // แก้คำผิด Onwer
+        const ownerKey = findKey(['owner', 'onwer', 'พนักงาน']); 
         if (!taskKey) return;
 
-        // 2. ล็อกเป้าการจัดหมวดหมู่จากชื่อไฟล์/ชีต
         let isRoutine = sMatch.includes('group') || sMatch.includes('monitoring') || sMatch.includes('routine');
         let isCompliant = sMatch.includes('compliant') || sMatch.includes('ร้องเรียน') || sMatch.includes('complaint');
 
         if (isRoutine) {
-            // *** ROUTINE (อ่านแนวนอน) ***
+            // *** ROUTINE MATRIX ***
             let jobType = 'Routine Monitoring';
             if (sMatch.includes('groupa')) jobType = 'Group A Monitoring';
             else if (sMatch.includes('groupb')) jobType = 'Group B Monitoring';
 
-            // ดึงคอลัมน์ที่ไม่ใช่วันที่ออก เพื่อให้เหลือเฉพาะวันที่
             const ignoredKeys = [taskKey, ownerKey].map(cleanKey);
 
             jsonRows.forEach(row => {
@@ -454,11 +439,10 @@ function processWorkbook(wb, fileName) {
 
                 headers.forEach(h => {
                     if (!ignoredKeys.includes(cleanKey(h))) {
-                        const dKey = normalizeDate(h);
+                        const dKey = parseDateKey(h);
                         const val = String(row[h]).trim().toUpperCase();
                         
-                        // เอาเฉพาะช่องที่มี S, P, N
-                        if (val && ['S','P','N','SUCCESS','PENDING'].some(v => val.includes(v))) {
+                        if (dKey && val && ['S','P','N','SUCCESS','PENDING'].some(v => val.includes(v))) {
                             let status = 'not run';
                             if (val === 'S' || val.includes('SUCCESS')) status = 'done';
                             else if (val === 'P' || val.includes('PENDING')) status = 'pending';
@@ -473,7 +457,7 @@ function processWorkbook(wb, fileName) {
             });
 
         } else {
-            // *** ADHOC & COMPLIANT (อ่านแนวตั้ง) ***
+            // *** ADHOC & COMPLIANT LIST ***
             const catKey = findKey(['category', 'หมวดหมู่']);
             const deadlineKey = findKey(['deadline', 'กำหนดส่ง', 'date']);
             const statusKey = findKey(['status', 'สถานะ']);
@@ -491,7 +475,7 @@ function processWorkbook(wb, fileName) {
 
                 let jobType = rowCatVal || (mainCategory === 'Compliant' ? 'Compliant Management' : 'Adhoc Task');
 
-                const dKey = deadlineKey ? normalizeDate(row[deadlineKey]) : '';
+                const dKey = deadlineKey ? parseDateKey(row[deadlineKey]) : '';
                 const sVal = statusKey ? String(row[statusKey]).toUpperCase() : '';
                 
                 let status = 'not run';
@@ -518,7 +502,6 @@ el('fileUpload').onchange = async (e) => {
     for(let f of files) {
         const buf = await f.arrayBuffer();
         const wb = XLSX.read(buf, { type: 'array' });
-        // บังคับเปลี่ยนชื่อชีตให้ตรงกับชื่อไฟล์ (สำหรับไฟล์ CSV)
         if (wb.SheetNames.length === 1 && f.name.includes('.csv')) {
             wb.SheetNames[0] = f.name.replace('.csv', '');
         }
@@ -531,7 +514,7 @@ el('fileUpload').onchange = async (e) => {
 
     updateDropdowns();
     renderUI();
-    saveToCloud(true);
+    saveToCloud(true); // เซฟขึ้นคลาวด์ พร้อมชื่อบริษัทใหม่
     e.target.value = '';
 };
 
@@ -565,23 +548,41 @@ function renderUI() {
     const adhoc = filtered.filter(t => t.category === 'Adhoc');
     const comp = filtered.filter(t => t.category === 'Compliant');
     
-    el('adhocTableBody').innerHTML = renderRows(adhoc);
-    el('compliantTableBody').innerHTML = renderRows(comp);
+    el('adhocTableBody').innerHTML = renderAdhocRows(adhoc);
+    el('compliantTableBody').innerHTML = renderCompRows(comp);
 
     renderRoutineMatrix(routines);
     renderCharts(filtered);
 }
 
-function renderRows(tasks) {
-    if(!tasks.length) return '<tr><td colspan="5" class="py-12 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">No Data Found</td></tr>';
+function renderAdhocRows(tasks) {
+    if(!tasks.length) return '<tr><td colspan="5" class="py-10 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">No Data Found</td></tr>';
     return tasks.map(t => `
         <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
-            <td class="px-5 py-4"><div class="text-xs font-bold ${t.status==='done'?'text-slate-500 line-through':'text-slate-200'} truncate w-40 xl:w-64" title="${t.taskName}">${t.taskName}</div></td>
-            <td class="px-5 py-4"><span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider truncate inline-block max-w-[150px]" title="${t.jobType}">${t.jobType}</span></td>
-            <td class="px-5 py-4 text-[11px] text-[#b490ff] font-black truncate w-32">${t.ownerName}</td>
-            <td class="px-5 py-4 text-[11px] text-slate-400 font-mono text-center">${t.date || '-'}</td>
-            <td class="px-5 py-4 text-center">
-                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/40 border ${t.status==='done'?'border-emerald-500/50 text-emerald-400':'border-white/10 text-slate-400'} text-[11px] rounded-lg py-1.5 pl-3 pr-8 outline-none font-bold shadow-sm cursor-pointer">
+            <td class="px-4 py-3"><div class="text-[11px] font-bold ${t.status==='done'?'text-slate-500 line-through':'text-slate-200'} truncate w-32 xl:w-48" title="${t.taskName}">${t.taskName}</div></td>
+            <td class="px-4 py-3"><span class="bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider truncate inline-block max-w-[120px]" title="${t.jobType}">${t.jobType}</span></td>
+            <td class="px-4 py-3 text-[10px] text-[#b490ff] font-black truncate w-24">${t.ownerName}</td>
+            <td class="px-4 py-3 text-[10px] text-slate-400 font-mono text-center">${t.date || '-'}</td>
+            <td class="px-4 py-3 text-center">
+                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/40 border ${t.status==='done'?'border-emerald-500/50 text-emerald-400':'border-white/10 text-slate-400'} text-[10px] rounded py-1 pl-2 pr-6 outline-none font-bold shadow-sm cursor-pointer">
+                    <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
+                    <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
+                    <option value="done" ${t.status==='done'?'selected':''}>S</option>
+                </select>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderCompRows(tasks) {
+    if(!tasks.length) return '<tr><td colspan="4" class="py-10 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">No Complaints Found</td></tr>';
+    return tasks.map(t => `
+        <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
+            <td class="px-4 py-3"><div class="text-[11px] font-bold ${t.status==='done'?'text-slate-500 line-through':'text-slate-200'} truncate w-40 xl:w-64" title="${t.taskName}">${t.taskName}</div></td>
+            <td class="px-4 py-3 text-[10px] text-rose-300 font-black truncate w-32">${t.ownerName}</td>
+            <td class="px-4 py-3 text-[10px] text-slate-400 font-mono text-center">${t.date || '-'}</td>
+            <td class="px-4 py-3 text-center">
+                <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/40 border ${t.status==='done'?'border-emerald-500/50 text-emerald-400':'border-white/10 text-slate-400'} text-[10px] rounded py-1 pl-2 pr-6 outline-none font-bold shadow-sm cursor-pointer">
                     <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
                     <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
                     <option value="done" ${t.status==='done'?'selected':''}>S</option>
@@ -594,7 +595,7 @@ function renderRows(tasks) {
 function renderRoutineMatrix(tasks) {
     const cont = el('routineContainer');
     if(!tasks.length) {
-        cont.innerHTML = `<div class="flex flex-col items-center justify-center h-48 text-slate-500 opacity-80 bg-slate-900/40 rounded-xl border border-white/5"><i class="fa-regular fa-folder-open text-4xl mb-4"></i><p class="text-[11px] font-black uppercase tracking-widest">Please select a date</p></div>`;
+        cont.innerHTML = `<div class="flex flex-col items-center justify-center h-32 text-slate-500 opacity-80 bg-slate-900/40 rounded-xl border border-white/5"><p class="text-[10px] font-black uppercase tracking-widest"><i class="fa-solid fa-calendar-day mr-2"></i>Please select a date</p></div>`;
         return;
     }
     
@@ -607,26 +608,26 @@ function renderRoutineMatrix(tasks) {
         const pct = Math.round((done / g.length) * 100);
         return `
         <div class="bg-slate-900/60 rounded-xl border border-white/5 overflow-hidden shadow-md">
-            <div class="p-4 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors" onclick="toggleAccordion(this)">
+            <div class="p-3 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors" onclick="toggleAccordion(this)">
                 <div class="flex-1 pr-6">
-                    <h4 class="text-[11px] font-black text-[#b490ff] uppercase tracking-widest mb-2">${name}</h4>
-                    <div class="w-full bg-black/60 h-2 rounded-full overflow-hidden shadow-inner">
+                    <h4 class="text-[11px] font-black text-[#b490ff] uppercase tracking-widest mb-1.5">${name}</h4>
+                    <div class="w-full bg-black/60 h-1.5 rounded-full overflow-hidden shadow-inner">
                         <div class="h-full bg-emerald-500 transition-all duration-1000" style="width: ${pct}%"></div>
                     </div>
                 </div>
-                <div class="flex items-center gap-4 text-right">
-                    <span class="text-base font-black text-white">${pct}%</span>
-                    <div class="bg-black/30 p-2 rounded-full"><i class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform"></i></div>
+                <div class="flex items-center gap-3 text-right">
+                    <span class="text-sm font-black text-white">${pct}%</span>
+                    <div class="bg-black/30 p-1.5 rounded-full"><i class="fa-solid fa-chevron-down text-slate-400 text-[9px] transition-transform"></i></div>
                 </div>
             </div>
-            <div class="p-2 border-t border-white/5 space-y-1">
+            <div class="p-1.5 border-t border-white/5 space-y-1">
                 ${g.map(t => `
-                    <div class="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
-                        <div class="flex-1 min-w-0 pr-4">
-                            <p class="text-sm font-bold ${t.status==='done'?'text-slate-600 line-through':'text-slate-200'} truncate" title="${t.taskName}">${t.taskName}</p>
-                            <span class="text-[10px] text-[#b490ff] font-bold uppercase mt-1 inline-block">${t.ownerName}</span>
+                    <div class="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors group">
+                        <div class="flex-1 min-w-0 pr-3">
+                            <p class="text-[11px] font-bold ${t.status==='done'?'text-slate-600 line-through':'text-slate-200'} truncate" title="${t.taskName}">${t.taskName}</p>
+                            <span class="text-[9px] text-[#b490ff] font-bold uppercase mt-0.5 inline-block">${t.ownerName}</span>
                         </div>
-                        <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/60 border ${t.status==='done'?'border-emerald-500/30 text-emerald-400':'border-white/10 text-slate-400'} text-[11px] rounded-lg py-1.5 pl-3 pr-8 outline-none font-bold shadow-sm cursor-pointer">
+                        <select onchange="changeTaskStatus('${t.id}', this.value)" class="status-select bg-black/60 border ${t.status==='done'?'border-emerald-500/30 text-emerald-400':'border-white/10 text-slate-400'} text-[10px] rounded py-1 pl-2 pr-6 outline-none font-bold shadow-sm cursor-pointer">
                             <option value="not run" ${t.status==='not run'?'selected':''}>N</option>
                             <option value="pending" ${t.status==='pending'?'selected':''}>P</option>
                             <option value="done" ${t.status==='done'?'selected':''}>S</option>
@@ -676,8 +677,8 @@ function renderCharts(tasks) {
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            scales: { x: { stacked: true, grid: { display: false }, ticks:{font:{size:10}} }, y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks:{font:{size:10}} } },
-            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, font: { size: 10 } } } }
+            scales: { x: { stacked: true, grid: { display: false }, ticks:{font:{size:9}} }, y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks:{font:{size:9}} } },
+            plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, font: { size: 9 } } } }
         }
     });
 }
@@ -698,7 +699,7 @@ el('logoUpload').onchange = (e) => {
     const f = e.target.files[0];
     if (f) {
         const r = new FileReader();
-        r.onload = (ev) => { el('companyLogoImg').src = ev.target.result; localStorage.setItem('ExecDash_Logo_Final_v5', ev.target.result); };
+        r.onload = (ev) => { el('companyLogoImg').src = ev.target.result; localStorage.setItem('ExecDash_Logo_Final_v6', ev.target.result); };
         r.readAsDataURL(f);
     }
 };
